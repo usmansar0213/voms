@@ -33,13 +33,13 @@ export function AppSidebar() {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size='lg' className='h-14 hover:bg-transparent' asChild>
+            <SidebarMenuButton size='lg' className='h-12 hover:bg-transparent' asChild>
               <Link to='/' onClick={() => setOpenMobile(false)}>
-                <div className='flex aspect-square size-10 items-center justify-center rounded-lg bg-sidebar-primary text-white'>
+                <div className='flex aspect-square size-9 items-center justify-center rounded-lg bg-sidebar-primary text-white'>
                   <Ship className='size-5' />
                 </div>
                 <div className='grid flex-1 text-start text-sm leading-tight'>
-                  <span className='truncate text-xl font-bold tracking-tight text-white'>VOMS</span>
+                  <span className='truncate text-lg font-bold tracking-tight text-white'>VOMS</span>
                   <span className='truncate text-xs text-sidebar-foreground/70'>Port of Subic Bay · Mockup</span>
                 </div>
               </Link>

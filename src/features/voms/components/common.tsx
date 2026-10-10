@@ -88,8 +88,8 @@ export function PageHeader({ title, description, actions }: { title: string; des
   return (
     <div className='flex flex-wrap items-start justify-between gap-3'>
       <div className='min-w-0'>
-        <h1 className='text-2xl font-bold tracking-tight sm:text-3xl'>{title}</h1>
-        {description && <p className='mt-1 text-sm text-muted-foreground sm:text-base'>{description}</p>}
+        <h1 className='text-xl font-bold tracking-tight sm:text-2xl'>{title}</h1>
+        {description && <p className='mt-1 text-sm text-muted-foreground'>{description}</p>}
       </div>
       <div className='flex flex-wrap items-center gap-2'>
         {actions}
@@ -130,17 +130,17 @@ export function StatTile({
     <Comp
       onClick={onClick}
       className={cn(
-        'flex min-w-0 items-center gap-3 rounded-xl border bg-card p-3 text-start shadow-xs sm:gap-4 sm:p-4',
+        'flex min-w-0 items-center gap-3 rounded-xl border bg-card p-3 text-start shadow-xs sm:p-4',
         onClick && 'transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none'
       )}
     >
-      <span className={cn('hidden size-12 shrink-0 items-center justify-center rounded-full sm:flex sm:size-14', tileTone[tone])}>
-        <Icon className='size-6 sm:size-7' aria-hidden />
+      <span className={cn('hidden size-10 shrink-0 items-center justify-center rounded-full sm:flex', tileTone[tone])}>
+        <Icon className='size-5' aria-hidden />
       </span>
       <span className='grid min-w-0 gap-0.5'>
-        <span className='text-sm text-muted-foreground sm:text-base sm:text-foreground'>{label}</span>
-        <span className='text-2xl font-bold tabular-nums sm:text-3xl'>{value}</span>
-        {hint && <span className='text-xs text-muted-foreground sm:text-sm'>{hint}</span>}
+        <span className='text-sm text-muted-foreground'>{label}</span>
+        <span className='text-2xl leading-tight font-semibold tabular-nums'>{value}</span>
+        {hint && <span className='text-xs text-muted-foreground'>{hint}</span>}
       </span>
     </Comp>
   )

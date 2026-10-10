@@ -85,7 +85,7 @@ function ManagementHome() {
       <div className='grid gap-4 xl:grid-cols-5'>
         <Card className='gap-0 py-0 xl:col-span-3'>
           <CardHeader className='border-b py-4'>
-            <CardTitle className='text-lg'>Cargo operations progress</CardTitle>
+            <CardTitle>Cargo operations progress</CardTitle>
             <CardDescription>Actual vs declared quantity per cargo line, in each commodity&apos;s own unit.</CardDescription>
           </CardHeader>
           <CardContent className='px-0'>
@@ -130,7 +130,7 @@ function ManagementHome() {
         <div className='grid h-fit gap-4 xl:col-span-2'>
           <Card>
             <CardHeader>
-              <CardTitle className='text-lg'>Attention required</CardTitle>
+              <CardTitle>Attention required</CardTitle>
               <CardDescription>Rule-based flags from recorded data — review flags, not proof of error.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -139,7 +139,7 @@ function ManagementHome() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle className='text-lg'>Berth status</CardTitle>
+              <CardTitle>Berth status</CardTitle>
               <CardDescription>{berths.length} placeholder berths — subject to SBMA facility register validation.</CardDescription>
               <CardAction>
                 <Button variant='ghost' size='sm' asChild>
@@ -162,7 +162,7 @@ function ManagementHome() {
 
       <Card>
         <CardHeader>
-          <CardTitle className='text-lg'>AI insights</CardTitle>
+          <CardTitle>AI insights</CardTitle>
           <CardDescription>Material deviations in your scope, with period, source and validation status.</CardDescription>
           <div>
             <SimulatedAiBadge />
@@ -182,7 +182,7 @@ function ManagementHome() {
       {scopedUnits(state).some((u) => u.metric) && (
         <Card>
           <CardHeader>
-            <CardTitle className='text-lg'>Daily throughput &amp; traffic — last 14 days</CardTitle>
+            <CardTitle>Daily throughput &amp; traffic — last 14 days</CardTitle>
             <CardDescription>From unit submissions. Each unit keeps its own measurement unit.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -194,7 +194,7 @@ function ManagementHome() {
       <div className='grid gap-4 lg:grid-cols-3'>
         <Card>
           <CardHeader>
-            <CardTitle className='text-lg'>Expected arrivals</CardTitle>
+            <CardTitle>Expected arrivals</CardTitle>
             <CardDescription>Ordered by ETA.</CardDescription>
           </CardHeader>
           <CardContent className='grid gap-2'>
@@ -218,7 +218,7 @@ function ManagementHome() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className='text-lg'>Vessel turnaround</CardTitle>
+            <CardTitle>Vessel turnaround</CardTitle>
             <CardDescription>ATA → ATD in hours (KPI-001), split by event interval.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -227,7 +227,7 @@ function ManagementHome() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className='text-lg'>Berth occupancy — 7 days</CardTitle>
+            <CardTitle>Berth occupancy — 7 days</CardTitle>
             <CardDescription>All Fast → Last Line hours as a share of the period.</CardDescription>
           </CardHeader>
           <CardContent>

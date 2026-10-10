@@ -69,10 +69,10 @@ const benefits: { icon: LucideIcon; title: string; text: string; color: string }
 
 function Step({ n, label, children, hint }: { n: number; label: string; children: ReactNode; hint?: ReactNode }) {
   return (
-    <div className='grid grid-cols-[2rem_1fr] gap-x-3 gap-y-1.5'>
-      <span className='mt-0.5 flex size-8 items-center justify-center rounded-full bg-[var(--series-1)]/15 text-sm font-semibold text-[var(--series-1-ink)]'>{n}</span>
+    <div className='grid grid-cols-[1.75rem_1fr] gap-x-3 gap-y-1.5'>
+      <span className='mt-0.5 flex size-7 items-center justify-center rounded-full bg-[var(--series-1)]/15 text-xs font-semibold text-[var(--series-1-ink)]'>{n}</span>
       <div className='grid min-w-0 gap-1.5'>
-        <label className='text-[15px] font-semibold'>{label}</label>
+        <label className='text-sm font-semibold'>{label}</label>
         {children}
         {hint && <p className='text-xs text-muted-foreground'>{hint}</p>}
       </div>
@@ -88,7 +88,7 @@ function IconSelect({ icon: Icon, value, onChange, children, label }: { icon: Lu
         aria-label={label}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className='h-11 w-full appearance-none rounded-md border border-input bg-background ps-10 pe-10 text-sm font-medium shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30 [&>option]:bg-background'
+        className='h-10 w-full appearance-none rounded-md border border-input bg-background ps-10 pe-10 text-sm font-medium shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30 [&>option]:bg-background'
       >
         {children}
       </select>
@@ -150,22 +150,22 @@ export function Login() {
             <div className='relative flex items-center gap-3'>
               <VomsMark className='h-14 w-16 xl:h-16 xl:w-[4.5rem]' />
               <div>
-                <div className='text-4xl leading-none font-extrabold tracking-tight text-[#0d2240] xl:text-5xl'>VOMS</div>
-                <div className='mt-1 text-base text-[#1f3a5f] xl:text-lg'>Vessel Operations Monitoring System</div>
-                <div className='text-sm text-[#3d5675]'>Port of Subic Bay</div>
+                <div className='text-3xl leading-none font-extrabold tracking-tight text-[#0d2240] xl:text-4xl'>VOMS</div>
+                <div className='mt-1 text-sm text-[#1f3a5f] xl:text-base'>Vessel Operations Monitoring System</div>
+                <div className='text-xs text-[#3d5675] xl:text-sm'>Port of Subic Bay</div>
               </div>
               <span className='ms-3 self-center rounded-full bg-[var(--status-good)]/15 px-3 py-1 text-xs font-semibold tracking-wide text-[var(--status-good-ink)]'>DEMO DATA</span>
             </div>
             <p className='relative mt-[3vh] text-[11px] font-medium tracking-[0.3em] text-[#2b4566] uppercase'>People · Safer operations · A brighter tomorrow</p>
 
             <div className='relative mt-[2.5vh] max-w-xl'>
-              <h1 className='text-[clamp(2rem,4.6vh,3.25rem)] leading-[1.07] font-extrabold tracking-tight text-[#0d2240]'>
+              <h1 className='text-[clamp(1.75rem,4vh,2.6rem)] leading-[1.07] font-extrabold tracking-tight text-[#0d2240]'>
                 Smarter Data.
                 <br />
                 Safer Operations.
                 <br />A Stronger Subic Bay.
               </h1>
-              <p className='mt-[2vh] max-w-lg text-[clamp(0.95rem,1.9vh,1.15rem)] text-[#1f3a5f]'>
+              <p className='mt-[2vh] max-w-md text-[clamp(0.875rem,1.7vh,1rem)] text-[#1f3a5f]'>
                 A unified platform to monitor vessel calls, cargo operations, berth utilization, safety and compliance — built for the Port of Subic Bay.
               </p>
             </div>
@@ -173,17 +173,17 @@ export function Login() {
             <ul className='relative mt-[3.5vh] grid max-w-xl grid-cols-4 gap-3 rounded-2xl bg-white/75 p-3 shadow-sm backdrop-blur-sm'>
               {benefits.map((b) => (
                 <li key={b.title} className='grid justify-items-center gap-1.5 text-center'>
-                  <span className='flex size-12 items-center justify-center rounded-full text-white shadow-md xl:size-14' style={{ background: b.color }}>
-                    <b.icon className='size-6' aria-hidden />
+                  <span className='flex size-10 items-center justify-center rounded-full text-white shadow-md xl:size-11' style={{ background: b.color }}>
+                    <b.icon className='size-5' aria-hidden />
                   </span>
-                  <span className='text-sm leading-tight font-semibold text-[#0d2240]'>{b.title}</span>
-                  <span className='text-xs leading-snug text-[#1f3a5f]'>{b.text}</span>
+                  <span className='text-[13px] leading-tight font-semibold text-[#0d2240]'>{b.title}</span>
+                  <span className='text-[11px] leading-snug text-[#1f3a5f]'>{b.text}</span>
                 </li>
               ))}
             </ul>
 
             <div className='relative mt-auto'>
-              <p className='font-["Great_Vibes",cursive] text-[clamp(1.75rem,4.2vh,2.75rem)] leading-[1.05] text-white drop-shadow-md'>
+              <p className='font-["Great_Vibes",cursive] text-[clamp(1.5rem,3.6vh,2.25rem)] leading-[1.05] text-white drop-shadow-md'>
                 A Connected Port
                 <br />
                 <span className='ms-12'>A Brighter Tomorrow</span>
@@ -209,7 +209,7 @@ export function Login() {
         <div className='relative -mt-10 px-3 pb-6 sm:px-6 lg:mt-0 lg:bg-gradient-to-br lg:from-[#cfe0f5] lg:to-[#eef3f9] lg:py-6 dark:lg:from-[#0f1726] dark:lg:to-[#162236]'>
           <div className='mx-auto grid max-w-xl gap-6 rounded-2xl border bg-card p-5 shadow-xl sm:p-7'>
             <div>
-              <h2 className='text-2xl font-bold tracking-tight sm:text-3xl'>Demo sign-in</h2>
+              <h2 className='text-xl font-bold tracking-tight sm:text-2xl'>Demo sign-in</h2>
               <p className='mt-1 text-sm text-muted-foreground'>Choose an organization, role and perspective. No password is used in this demo.</p>
             </div>
 
@@ -280,12 +280,12 @@ export function Login() {
             </div>
 
             <div className='grid gap-1.5'>
-              <label htmlFor='demo-name' className='text-[15px] font-semibold'>
+              <label htmlFor='demo-name' className='text-sm font-semibold'>
                 Your name (for audit trail)
               </label>
               <div className='relative'>
                 <UserRound className='pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' aria-hidden />
-                <Input id='demo-name' className='h-11 ps-10' value={name} placeholder='Enter a fictitious name (e.g., Juan Dela Cruz)' onChange={(e) => setName(e.target.value)} />
+                <Input id='demo-name' className='h-10 ps-10' value={name} placeholder='Enter a fictitious name (e.g., Juan Dela Cruz)' onChange={(e) => setName(e.target.value)} />
               </div>
               <p className='text-xs text-muted-foreground'>Optional — defaults to “{defaultName(role, perspective, orgId)}”.</p>
             </div>
@@ -293,7 +293,7 @@ export function Login() {
             <button
               type='button'
               onClick={() => enter(buildSession(orgId, role, perspective, effectiveScope.id, name))}
-              className='flex h-12 items-center justify-center gap-2 rounded-md bg-[var(--sidebar-primary)] text-base font-semibold text-white shadow-sm transition-colors hover:bg-[var(--series-1-ink)] focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none'
+              className='flex h-11 items-center justify-center gap-2 rounded-md bg-[var(--sidebar-primary)] text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[var(--series-1-ink)] focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none'
             >
               <Play className='size-4 fill-current' aria-hidden /> Enter as {perspectiveMeta[perspective].short} — {roleById[role].short}
             </button>
@@ -305,7 +305,7 @@ export function Login() {
 
             <div className='grid gap-3 border-t pt-5'>
               <div>
-                <h3 className='text-xl font-bold tracking-tight'>Quick start personas</h3>
+                <h3 className='text-base font-semibold'>Quick start personas</h3>
                 <p className='text-sm text-muted-foreground'>Jump straight into a demo scenario.</p>
               </div>
               <div className='grid grid-cols-1 gap-2.5 min-[480px]:grid-cols-2'>

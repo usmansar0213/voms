@@ -96,7 +96,7 @@ export function SubmissionDetail() {
       </Button>
       <div className='flex flex-wrap items-start justify-between gap-3'>
         <div className='min-w-0'>
-          <h1 className='break-all text-xl font-bold tracking-tight'>{sub.fileName}</h1>
+          <h1 className='break-all text-lg font-bold tracking-tight sm:text-xl'>{sub.fileName}</h1>
           <p className='text-sm text-muted-foreground'>
             {sub.id} · {sub.reportType} · {unitById[sub.unitId]?.name}
           </p>
