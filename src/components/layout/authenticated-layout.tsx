@@ -1,4 +1,5 @@
-import { Outlet } from '@tanstack/react-router'
+import { Navigate, Outlet } from '@tanstack/react-router'
+import { useVoms } from '@/features/voms/store'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
 import { LayoutProvider } from '@/context/layout-provider'
@@ -14,6 +15,8 @@ type AuthenticatedLayoutProps = {
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
   const defaultOpen = getCookie('sidebar_state') !== 'false'
+  const signedIn = useVoms((s) => !!s.session)
+  if (!signedIn) return <Navigate to='/login' />
   return (
     <SearchProvider>
       <LayoutProvider>

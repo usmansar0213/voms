@@ -48,7 +48,7 @@ export function CallReport() {
             <ArrowLeft /> Back to vessel call
           </Link>
         </Button>
-        {can(state.role, 'report.export') && (
+        {can(state, 'report.export') && (
           <Button size='sm' onClick={() => window.print()}>
             <Printer /> Print / save as PDF
           </Button>

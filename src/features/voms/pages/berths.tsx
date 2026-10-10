@@ -8,7 +8,7 @@ import { PageShell } from '@/components/layout/page-shell'
 import { berthNextPlanned, berthOccupant, berthState, callStatus, lineProgress, type BerthState } from '../calc'
 import { fmtDateTime, fmtNum, fmtRelative, fmtShort } from '../format'
 import { can } from '../roles'
-import { useVoms, visibleCalls } from '../store'
+import { useVoms, visibleCalls, useActor } from '../store'
 import type { VesselCall } from '../types'
 import { berthStateMeta } from '../components/berth-tile'
 import { AssignBerthDialog } from '../components/dialogs'
@@ -17,7 +17,8 @@ import { scenarioLabel } from './vessel-calls'
 
 export function Berths() {
   const state = useVoms()
-  const { berths, vessels, role } = state
+  const { berths, vessels } = state
+  const actor = useActor()
   const calls = visibleCalls(state)
   const [assign, setAssign] = useState<VesselCall | null>(null)
   const [filter, setFilter] = useState<BerthState | 'all'>('all')
@@ -64,7 +65,7 @@ export function Berths() {
                 </div>
                 <div className='flex items-center gap-2'>
                   <StatusBadge call={c} />
-                  {can(role, 'berth.assign') && (
+                  {can(actor, 'berth.assign') && (
                     <Button size='sm' onClick={() => setAssign(c)}>
                       Assign
                     </Button>

@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
-import { Anchor, BarChart3, LayoutDashboard, Menu, Ship } from 'lucide-react'
+import { Bell, FileStack, LayoutDashboard, Menu, Ship } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useSidebar } from '@/components/ui/sidebar'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { DemoBadge } from '@/features/voms/components/common'
-import { RoleSwitcher } from '@/features/voms/components/role-switcher'
+import { SessionMenu } from '@/features/voms/components/session-menu'
 import { Header } from './header'
 import { Main } from './main'
 
@@ -18,7 +18,7 @@ export function PageShell({ children, className }: { children: ReactNode; classN
       <Header fixed>
         <Search className='me-auto min-w-0' placeholder='Search…' />
         <DemoBadge className='hidden lg:inline-flex' />
-        <RoleSwitcher />
+        <SessionMenu />
         <ThemeSwitch />
         <div className='hidden sm:block'>
           <ConfigDrawer />
@@ -30,10 +30,10 @@ export function PageShell({ children, className }: { children: ReactNode; classN
 }
 
 const tabs = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/', label: 'Home', icon: LayoutDashboard },
+  { to: '/submissions', label: 'Submissions', icon: FileStack },
   { to: '/vessel-calls', label: 'Calls', icon: Ship },
-  { to: '/berths', label: 'Berths', icon: Anchor },
-  { to: '/reports', label: 'Reports', icon: BarChart3 },
+  { to: '/alerts', label: 'Alerts', icon: Bell },
 ] as const
 
 /** Thumb-reachable navigation for phones; the full menu stays in the sidebar sheet. */

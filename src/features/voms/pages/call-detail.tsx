@@ -38,7 +38,7 @@ import {
 } from '../calc'
 import { fmtDateTime, fmtHours, fmtNum, fmtQty, fmtShort } from '../format'
 import { can, roleById } from '../roles'
-import { useVoms, visibleCalls } from '../store'
+import { useVoms, visibleCalls, useActor } from '../store'
 import type { EventKey, VesselCall } from '../types'
 import { scenarioLabel } from './vessel-calls'
 import {
@@ -164,6 +164,7 @@ export function CallDetail() {
 
 function NextStep({ call, onGoTo }: { call: VesselCall; onGoTo: (tab: string) => void }) {
   const role = useVoms((s) => s.role)
+  const actor = useActor()
   const incidents = useVoms((s) => s.incidents)
   const [dialog, setDialog] = useState<EventKey | 'berth' | 'production' | null>(null)
   const status = callStatus(call)
@@ -174,10 +175,10 @@ function NextStep({ call, onGoTo }: { call: VesselCall; onGoTo: (tab: string) =>
   if (status === 'closed') text = 'This vessel call is closed. Records are read-only unless reopened with an approved reason.'
   else if ((status === 'arrived' || status === 'expected') && !call.berthId) {
     text = 'No berth assigned yet. The Harbor Master assigns a compatible berth.'
-    action = { label: 'Assign berth', run: () => setDialog('berth'), allowed: can(role, 'berth.assign') }
+    action = { label: 'Assign berth', run: () => setDialog('berth'), allowed: can(actor, 'berth.assign') }
   } else if (status === 'operations') {
     text = 'Cargo operations in progress. The terminal operator records production; SBMA verifies it.'
-    action = { label: 'Record production', run: () => setDialog('production'), allowed: can(role, 'production.record') }
+    action = { label: 'Record production', run: () => setDialog('production'), allowed: can(actor, 'production.record') }
   } else if (status === 'departed') {
     text = canClose(call, incidents)
       ? 'Vessel has departed and the closure checklist is satisfied.'
@@ -189,7 +190,7 @@ function NextStep({ call, onGoTo }: { call: VesselCall; onGoTo: (tab: string) =>
   } else if (next) {
     text = `Next expected event: ${eventLabels[next]}.`
     const isTerminal = next === 'opsStart' || next === 'opsEnd'
-    action = { label: `Record ${eventLabels[next].split(' (')[0]}`, run: () => setDialog(next), allowed: can(role, 'event.movement') || (isTerminal && role === 'terminal_operator') }
+    action = { label: `Record ${eventLabels[next].split(' (')[0]}`, run: () => setDialog(next), allowed: can(actor, 'event.movement') || (isTerminal && role === 'terminal_operator') }
   }
 
   return (
@@ -219,7 +220,8 @@ function NextStep({ call, onGoTo }: { call: VesselCall; onGoTo: (tab: string) =>
 }
 
 function Overview({ call }: { call: VesselCall }) {
-  const { vessels, berths, role } = useVoms()
+  const { vessels, berths } = useVoms()
+  const actor = useActor()
   const vessel = vessels.find((v) => v.id === call.vesselId)!
   const berth = berths.find((b) => b.id === call.berthId)
   const [dialog, setDialog] = useState<'berth' | 'eta' | 'etd' | null>(null)
@@ -267,17 +269,17 @@ function Overview({ call }: { call: VesselCall }) {
           />
           {editable && (
             <div className='flex flex-wrap gap-2'>
-              {can(role, 'call.updateEta') && !call.events.ata && (
+              {can(actor, 'call.updateEta') && !call.events.ata && (
                 <Button size='sm' variant='outline' onClick={() => setDialog('eta')}>
                   <Pencil /> Update ETA
                 </Button>
               )}
-              {can(role, 'call.updateEta') && !call.events.atd && (
+              {can(actor, 'call.updateEta') && !call.events.atd && (
                 <Button size='sm' variant='outline' onClick={() => setDialog('etd')}>
                   <Pencil /> Update ETD
                 </Button>
               )}
-              {can(role, 'berth.assign') && !call.events.lastLine && (
+              {can(actor, 'berth.assign') && !call.events.lastLine && (
                 <Button size='sm' variant='outline' onClick={() => setDialog('berth')}>
                   <Pencil /> {call.berthId ? 'Change berth' : 'Assign berth'}
                 </Button>
@@ -294,19 +296,20 @@ function Overview({ call }: { call: VesselCall }) {
 
 function Movements({ call }: { call: VesselCall }) {
   const role = useVoms((s) => s.role)
+  const actor = useActor()
   const verifyEvent = useVoms((s) => s.verifyEvent)
   const verifyAll = useVoms((s) => s.verifyAllEvents)
   const [dialog, setDialog] = useState<EventKey | null>(null)
   const issues = sequenceIssues(call)
   const closed = !!call.closure
-  const canRecord = (k: EventKey) => !closed && (can(role, 'event.movement') || (role === 'terminal_operator' && (k === 'opsStart' || k === 'opsEnd')))
+  const canRecord = (k: EventKey) => !closed && (can(actor, 'event.movement') || (role === 'terminal_operator' && (k === 'opsStart' || k === 'opsEnd')))
   const anyUnverified = eventOrder.some((k) => call.events[k] && !call.events[k]!.verifiedBy)
   return (
     <Card>
       <CardHeader>
         <CardTitle>Movement events</CardTitle>
         <CardDescription>Actual times recorded against the Vessel Call ID. Recorder and verifier must be different roles.</CardDescription>
-        {can(role, 'event.verify') && anyUnverified && !closed && (
+        {can(actor, 'event.verify') && anyUnverified && !closed && (
           <CardAction>
             <Button size='sm' variant='outline' onClick={() => runAction(() => verifyAll(call.id), 'Events verified')}>
               <ClipboardCheck /> Verify all
@@ -364,7 +367,7 @@ function Movements({ call }: { call: VesselCall }) {
                         {ev ? 'Amend' : 'Record'}
                       </Button>
                     )}
-                    {ev && !ev.verifiedBy && can(role, 'event.verify') && !closed && (
+                    {ev && !ev.verifiedBy && can(actor, 'event.verify') && !closed && (
                       <Button size='sm' variant='outline' onClick={() => runAction(() => verifyEvent(call.id, k), 'Event verified')}>
                         <Check /> Verify
                       </Button>
@@ -382,7 +385,8 @@ function Movements({ call }: { call: VesselCall }) {
 }
 
 function CargoTab({ call }: { call: VesselCall }) {
-  const { role, verifyProduction, endDelay, submitTally, verifyTally } = useVoms()
+  const { verifyProduction, endDelay, submitTally, verifyTally } = useVoms()
+  const actor = useActor()
   const [selected, setSelected] = useState<string[]>([])
   const [dialog, setDialog] = useState<'production' | 'delay' | null>(null)
   const status = callStatus(call)
@@ -395,7 +399,7 @@ function CargoTab({ call }: { call: VesselCall }) {
         <CardHeader>
           <CardTitle>Cargo progress</CardTitle>
           <CardDescription>Declared by the shipping agent; actual quantities reported by the terminal operator.</CardDescription>
-          {can(role, 'production.record') && status === 'operations' && (
+          {can(actor, 'production.record') && status === 'operations' && (
             <CardAction>
               <Button size='sm' onClick={() => setDialog('production')}>
                 <Plus /> Production
@@ -455,7 +459,7 @@ function CargoTab({ call }: { call: VesselCall }) {
         <CardHeader>
           <CardTitle>Production log</CardTitle>
           <CardDescription>Submitted entries require SBMA verification (segregation of duties).</CardDescription>
-          {can(role, 'production.verify') && unverified.length > 0 && !closed && (
+          {can(actor, 'production.verify') && unverified.length > 0 && !closed && (
             <CardAction>
               <Button
                 size='sm'
@@ -477,7 +481,7 @@ function CargoTab({ call }: { call: VesselCall }) {
             <ul className='divide-y'>
               {[...call.production].reverse().map((p) => {
                 const l = call.cargo.find((x) => x.id === p.lineId)!
-                const selectable = can(role, 'production.verify') && p.status !== 'verified' && !closed
+                const selectable = can(actor, 'production.verify') && p.status !== 'verified' && !closed
                 return (
                   <li key={p.id} className='flex flex-wrap items-center gap-2 py-2 text-sm'>
                     {selectable && (
@@ -509,7 +513,7 @@ function CargoTab({ call }: { call: VesselCall }) {
           <CardHeader>
             <CardTitle>Delays & stoppages</CardTitle>
             <CardDescription>Total {fmtHours(delayHours(call))}. Categories proposed — subject to SBMA confirmation.</CardDescription>
-            {can(role, 'delay.record') && !closed && call.events.ata && (
+            {can(actor, 'delay.record') && !closed && call.events.ata && (
               <CardAction>
                 <Button size='sm' variant='outline' onClick={() => setDialog('delay')}>
                   <Plus /> Delay
@@ -535,7 +539,7 @@ function CargoTab({ call }: { call: VesselCall }) {
                     <div className='text-xs text-muted-foreground'>
                       {fmtShort(d.start)} → {d.end ? fmtShort(d.end) : 'now'} {d.remarks && `· ${d.remarks}`}
                     </div>
-                    {!d.end && can(role, 'delay.record') && !closed && (
+                    {!d.end && can(actor, 'delay.record') && !closed && (
                       <Button size='sm' variant='ghost' className='mt-1' onClick={() => runAction(() => endDelay(call.id, d.id), 'Delay ended')}>
                         End delay now
                       </Button>
@@ -564,18 +568,18 @@ function CargoTab({ call }: { call: VesselCall }) {
               <p className='text-muted-foreground'>Not yet submitted.</p>
             )}
             <div className='flex flex-wrap gap-2'>
-              {can(role, 'tally.submit') && !call.finalTally && !closed && (
+              {can(actor, 'tally.submit') && !call.finalTally && !closed && (
                 <Button size='sm' disabled={!call.events.opsEnd} onClick={() => runAction(() => submitTally(call.id), 'Final tally submitted')}>
                   Submit final tally
                 </Button>
               )}
-              {can(role, 'tally.verify') && call.finalTally && !call.finalTally.verifiedBy && !closed && (
+              {can(actor, 'tally.verify') && call.finalTally && !call.finalTally.verifiedBy && !closed && (
                 <Button size='sm' onClick={() => runAction(() => verifyTally(call.id), 'Final tally verified')}>
                   <Check /> Verify final tally
                 </Button>
               )}
             </div>
-            {!call.events.opsEnd && can(role, 'tally.submit') && <p className='text-xs text-muted-foreground'>Available once “Cargo operations completed” is recorded.</p>}
+            {!call.events.opsEnd && can(actor, 'tally.submit') && <p className='text-xs text-muted-foreground'>Available once “Cargo operations completed” is recorded.</p>}
           </CardContent>
         </Card>
       </div>
@@ -586,7 +590,8 @@ function CargoTab({ call }: { call: VesselCall }) {
 }
 
 function IncidentsTab({ call }: { call: VesselCall }) {
-  const { incidents, role } = useVoms()
+  const { incidents } = useVoms()
+  const actor = useActor()
   const [open, setOpen] = useState(false)
   const list = incidents.filter((i) => i.callId === call.id)
   return (
@@ -594,7 +599,7 @@ function IncidentsTab({ call }: { call: VesselCall }) {
       <CardHeader>
         <CardTitle>Linked incidents</CardTitle>
         <CardDescription>Safety, security, environmental and dangerous-cargo events for this vessel call.</CardDescription>
-        {can(role, 'incident.report') && !call.closure && (
+        {can(actor, 'incident.report') && !call.closure && (
           <CardAction>
             <Button size='sm' onClick={() => setOpen(true)}>
               <ShieldAlert /> Report
@@ -624,7 +629,8 @@ function IncidentsTab({ call }: { call: VesselCall }) {
 }
 
 function ClosureTab({ call }: { call: VesselCall }) {
-  const { incidents, role, closeCall, reopenCall } = useVoms()
+  const { incidents, closeCall, reopenCall } = useVoms()
+  const actor = useActor()
   const [reason, setReason] = useState('')
   const checklist = closureChecklist(call, incidents)
   const ready = canClose(call, incidents)
@@ -654,7 +660,7 @@ function ClosureTab({ call }: { call: VesselCall }) {
             <div className='flex items-center gap-2 text-sm'>
               <Lock className='size-4' /> Closed {fmtDateTime(call.closure.at)} by {roleById[call.closure.by].name}
             </div>
-            {can(role, 'call.reopen') && (
+            {can(actor, 'call.reopen') && (
               <div className='grid gap-2'>
                 <Textarea rows={2} placeholder='Reason for reopening (required, recorded in audit trail)' value={reason} onChange={(e) => setReason(e.target.value)} />
                 <Button
@@ -670,7 +676,7 @@ function ClosureTab({ call }: { call: VesselCall }) {
               </div>
             )}
           </div>
-        ) : can(role, 'call.close') ? (
+        ) : can(actor, 'call.close') ? (
           <Button className='w-fit' disabled={!ready} onClick={() => runAction(() => closeCall(call.id), 'Vessel call closed')}>
             <Lock /> Close vessel call
           </Button>

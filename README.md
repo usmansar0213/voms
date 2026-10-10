@@ -6,20 +6,31 @@ This is an interactive UI mockup of the **Vessel Operations Monitoring System (V
 
 ## What it shows
 
-| Module | BRD reference |
-| --- | --- |
-| Port operations dashboard with KPI tiles, cargo progress, alerts, berth status and charts | §4, §16 |
-| Vessel calls: one **Vessel Call ID** per call, lifecycle stepper and next-step guidance | §8, §9 |
-| Movement events from ETA to ATD (ATA, pilot, first line, All Fast, ops start/end, last line), with source, recorder, verifier and sequence checks | §10, §15 |
-| Berth assignment with LOA, draft and vessel-type compatibility checks; berth board | §11 |
-| Cargo in commodity-specific units (TEU, MT, KL, units): production log, verification, delays, productivity, final tally | §12, §13 |
-| Safety, security, environmental and dangerous-cargo incidents with corrective actions and restricted detail | §14 |
-| Closure checklist, controlled reopening and an audit trail on every change | §15, §17 |
-| Integrated Vessel Call Report (print / save as PDF) and CSV export | §16 |
-| Simulated AIS and TOS feeds with online/offline fallback and source reconciliation | §19 |
-| Roles & access: role switcher and permission matrix, with recorder and approver kept separate | §18 |
+The mockup follows the **Project Design Document v0.1**. It has **six operational roles** (BRD Section 18), and each role has two perspectives:
 
-The demo guide in the app walks through three scenarios: a **container vessel**, a **bulk carrier** and a **fuel tanker**. The layout is mobile-first: a bottom navigation bar on phones, two columns on tablets and the full dashboard on desktop. Demo data lives in the browser's local storage, and **Reset demo data** restores the starting scenario relative to the current time.
+| Role | Submission perspective (record & submit) | Management perspective (verify, approve & monitor) |
+| --- | --- | --- |
+| Port Control Operator | Movement events, daily vessel movement log, AIS feed | Port-wide traffic and delays; verifies movement records |
+| Harbor Master / Authorized Officer | Berth assignment, safety inspection reports, incidents | Verifies production and final tally; closes incidents and vessel calls |
+| Terminal Operator | Daily terminal reports (Excel/PDF), production, delays, TOS API | Terminal KPIs for one or several terminals; approves terminal submissions |
+| Shipping Agent | Pre-arrival notices, ETA updates, manifests | Own vessel calls from arrival to departure |
+| Port Authority Management | Monthly port statistics report | Port-wide KPIs, alerts, AI insights and discussion |
+| System / Access Administrator | Access and connector changes, mapping tables, simulator | System health, data freshness and audit |
+
+A record is never approved from the perspective that created it, and a submitter cannot approve their own submission.
+
+| Module | Reference |
+| --- | --- |
+| Demo sign-in: Organization → Role → Perspective → Scope (no password) and quick-start personas | PDD §2 |
+| Scoped access: one terminal, several terminals or port-wide; dashboards, alerts, files and AI answers all respect the scope | PDD §2 |
+| Submission dashboard and Management dashboard for every role | PDD §6 |
+| Submission Center: simulated Excel/PDF extraction with confidence and source citation, anomaly detection, correction history, approval | PDD §5 |
+| API Integration Monitor: success/failure, retries, mapping errors, freshness, failure simulation | PDD §5, BRD §19 |
+| Alerts with severity, evidence, owner, acknowledgment and resolution, plus an empty state | PDD §6 |
+| AI insight cards and a contextual discussion box (rule-based, clearly labelled simulation) | PDD §7 |
+| Vessel calls, berths, cargo in commodity units, incidents, closure, audit trail, integrated report | BRD §8–16 |
+
+The Demo Guide covers the five PDD scenarios, with a start button for each. The layout is mobile-first, and every journey works on a phone.
 
 ## Run locally
 

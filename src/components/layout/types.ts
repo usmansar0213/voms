@@ -4,6 +4,8 @@ type BaseNavItem = {
   title: string
   badge?: string
   icon?: React.ElementType
+  /** Restrict the item to one perspective (PDD §4 screen inventory). */
+  only?: 'submission' | 'management'
 }
 
 type NavLink = BaseNavItem & {

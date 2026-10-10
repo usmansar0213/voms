@@ -13,6 +13,10 @@
   html {
     @apply overflow-x-hidden;
   }
+  /* Let grid items shrink below their content width (prevents mobile overflow). */
+  .grid > * {
+    min-width: 0;
+  }
   body {
     @apply min-h-svh w-full bg-background text-foreground has-[div[data-variant='inset']]:bg-sidebar;
   }

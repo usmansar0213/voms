@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { PageShell } from '@/components/layout/page-shell'
 import { fmtDateTime } from '../format'
 import { can, roleById } from '../roles'
-import { useVoms, visibleCalls } from '../store'
+import { useVoms, visibleCalls, useActor } from '../store'
 import type { Incident } from '../types'
 import { IncidentDialog } from '../components/dialogs'
 import { EmptyState, PageHeader, runAction, SeverityBadge, ToneBadge } from '../components/common'
@@ -22,6 +22,7 @@ const typeLabel: Record<Incident['type'], string> = {
 export function Incidents() {
   const state = useVoms()
   const { role, toggleIncidentAction, setIncidentStatus } = state
+  const actor = useActor()
   const visible = new Set(visibleCalls(state).map((c) => c.id))
   const list = state.incidents.filter((i) => visible.has(i.callId))
   const [open, setOpen] = useState(false)
@@ -36,7 +37,7 @@ export function Incidents() {
         title='Safety, Security & Environmental'
         description='Incidents linked to vessel calls. VOMS records and monitors; it does not replace specialist assessment or official notification.'
         actions={
-          can(role, 'incident.report') && (
+          can(actor, 'incident.report') && (
             <Button onClick={() => setOpen(true)}>
               <ShieldAlert /> Report incident
             </Button>
@@ -86,7 +87,7 @@ export function Incidents() {
                         <li key={a.id} className='flex items-center gap-2'>
                           <Checkbox
                             checked={a.done}
-                            disabled={i.status === 'closed' || !can(role, 'incident.report')}
+                            disabled={i.status === 'closed' || !can(actor, 'incident.report')}
                             onCheckedChange={() => runAction(() => toggleIncidentAction(i.id, a.id))}
                             aria-label={a.text}
                           />
@@ -101,12 +102,12 @@ export function Incidents() {
                     </p>
                   ) : (
                     <div className='flex flex-wrap gap-2'>
-                      {i.status === 'open' && can(role, 'incident.report') && (
+                      {i.status === 'open' && can(actor, 'incident.report') && (
                         <Button size='sm' variant='outline' onClick={() => runAction(() => setIncidentStatus(i.id, 'under_review'), 'Marked under review')}>
                           Mark under review
                         </Button>
                       )}
-                      {can(role, 'incident.close') && (
+                      {can(actor, 'incident.close') && (
                         <Button size='sm' onClick={() => runAction(() => setIncidentStatus(i.id, 'closed'), `${i.id} closed`)}>
                           Close incident
                         </Button>

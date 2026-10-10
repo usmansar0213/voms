@@ -66,8 +66,6 @@ export const agents: Agent[] = [
   { id: 'AG-02', name: 'Demo Shipping Agency B' },
 ]
 
-/** The agency the "Shipping Agent" demo role belongs to. */
-export const DEMO_AGENT_ID = 'AG-01'
 
 function berth(n: number, maxLoa: number, maxDraft: number, accepts: Scenario[]): Berth {
   const id = `B-${String(n).padStart(2, '0')}`

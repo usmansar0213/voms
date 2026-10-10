@@ -82,6 +82,7 @@ export interface AuditEntry {
   id: string
   time: string
   actor: RoleId
+  by?: string
   action: string
   detail: string
 }
@@ -155,16 +156,110 @@ export interface Incident {
   closedAt?: string
 }
 
-export interface FeedState {
-  ais: boolean
-  tos: boolean
+// ---------------------------------------------------------------------------
+// Project Design Document v0.1 additions: organizations, perspectives,
+// submissions, API connectors, alerts and daily statistics.
+
+export type Perspective = 'submission' | 'management'
+
+export interface Session {
+  name: string
+  orgId: string
+  role: RoleId
+  perspective: Perspective
+  /** Units this session may see. Port-wide sessions list every unit. */
+  scopeUnitIds: string[]
+  scopeLabel: string
 }
 
-export interface FeedMessage {
+export type SubmissionStatus = 'processing' | 'review' | 'submitted' | 'approved' | 'rejected'
+
+export interface ExtractedField {
+  key: string
+  label: string
+  value: string
+  unit?: string
+  confidence: number // 0..1
+  citation: string // e.g. "Sheet1!C7" or "p.2, table 1"
+  original?: string // value before coordinator correction
+}
+
+export interface Submission {
+  id: string
+  orgId: string
+  unitId: string
+  role: RoleId
+  channel: 'upload' | 'api'
+  reportType: string
+  fileName: string
+  format: 'xlsx' | 'pdf' | 'json'
+  reportDate: string // yyyy-mm-dd
+  callId?: string
+  receivedAt: string
+  submittedBy: string
+  status: SubmissionStatus
+  fields: ExtractedField[]
+  anomalies: string[]
+  validation: string[]
+  approvedBy?: string
+  approvedAt?: string
+  rejectedReason?: string
+  history: { time: string; who: string; action: string }[]
+}
+
+export type ConnectorStatus = 'healthy' | 'degraded' | 'failed'
+
+export interface Connector {
+  id: string
+  orgId: string
+  unitId: string
+  name: string
+  system: 'TOS' | 'AIS/VTMS' | 'Gate'
+  status: ConnectorStatus
+  lastSuccess: string
+  lastAttempt: string
+  success24h: number
+  failure24h: number
+  retryQueue: number
+  mappingErrors: { time: string; field: string; message: string }[]
+  log: { time: string; level: 'info' | 'warn' | 'error'; message: string }[]
+}
+
+export type AlertSeverity = 'info' | 'warning' | 'serious' | 'critical'
+export type AlertCategory =
+  | 'data_anomaly'
+  | 'api_failure'
+  | 'missing_submission'
+  | 'vessel_delay'
+  | 'incident'
+  | 'environment'
+  | 'traffic'
+
+export interface Alert {
   id: string
   time: string
-  feed: 'AIS' | 'TOS'
-  callId: string
-  text: string
-  outcome: 'accepted_pending' | 'rejected' | 'queued'
+  severity: AlertSeverity
+  category: AlertCategory
+  title: string
+  evidence: string
+  unitId: string
+  callId?: string
+  ownerRole: RoleId
+  status: 'open' | 'acknowledged' | 'resolved'
+  ackBy?: string
+  ackAt?: string
+  resolvedBy?: string
+  resolvedAt?: string
+  resolution?: string
+}
+
+export type DailyMetric = 'container_moves' | 'bulk_mt' | 'liquid_kl' | 'vessel_arrivals'
+
+export interface DailyStat {
+  unitId: string
+  date: string // yyyy-mm-dd
+  metric: DailyMetric
+  value: number
+  status: 'published' | 'pending_review'
+  submissionId?: string
 }

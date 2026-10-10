@@ -10,21 +10,31 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteRouteImport } from './routes/_app/route'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccessRouteImport } from './routes/_app/access'
+import { Route as AppAlertsRouteImport } from './routes/_app/alerts'
+import { Route as AppApiMonitorRouteImport } from './routes/_app/api-monitor'
+import { Route as AppAskRouteImport } from './routes/_app/ask'
 import { Route as AppBerthsRouteImport } from './routes/_app/berths'
 import { Route as AppCargoRouteImport } from './routes/_app/cargo'
 import { Route as AppGuideRouteImport } from './routes/_app/guide'
 import { Route as AppIncidentsRouteImport } from './routes/_app/incidents'
-import { Route as AppIntegrationsRouteImport } from './routes/_app/integrations'
 import { Route as AppVesselsRouteImport } from './routes/_app/vessels'
 import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
 import { Route as AppReportsCallIdRouteImport } from './routes/_app/reports/$callId'
+import { Route as AppSubmissionsIndexRouteImport } from './routes/_app/submissions/index'
+import { Route as AppSubmissionsSubIdRouteImport } from './routes/_app/submissions/$subId'
 import { Route as AppVesselCallsIndexRouteImport } from './routes/_app/vessel-calls/index'
 import { Route as AppVesselCallsCallIdRouteImport } from './routes/_app/vessel-calls/$callId'
 
 const AppRouteRoute = AppRouteRouteImport.update({
   id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -35,6 +45,21 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppAccessRoute = AppAccessRouteImport.update({
   id: '/access',
   path: '/access',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAlertsRoute = AppAlertsRouteImport.update({
+  id: '/alerts',
+  path: '/alerts',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppApiMonitorRoute = AppApiMonitorRouteImport.update({
+  id: '/api-monitor',
+  path: '/api-monitor',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppAskRoute = AppAskRouteImport.update({
+  id: '/ask',
+  path: '/ask',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppBerthsRoute = AppBerthsRouteImport.update({
@@ -57,11 +82,6 @@ const AppIncidentsRoute = AppIncidentsRouteImport.update({
   path: '/incidents',
   getParentRoute: () => AppRouteRoute,
 } as any)
-const AppIntegrationsRoute = AppIntegrationsRouteImport.update({
-  id: '/integrations',
-  path: '/integrations',
-  getParentRoute: () => AppRouteRoute,
-} as any)
 const AppVesselsRoute = AppVesselsRouteImport.update({
   id: '/vessels',
   path: '/vessels',
@@ -77,6 +97,16 @@ const AppReportsCallIdRoute = AppReportsCallIdRouteImport.update({
   path: '/reports/$callId',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppSubmissionsIndexRoute = AppSubmissionsIndexRouteImport.update({
+  id: '/submissions/',
+  path: '/submissions/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppSubmissionsSubIdRoute = AppSubmissionsSubIdRouteImport.update({
+  id: '/submissions/$subId',
+  path: '/submissions/$subId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppVesselCallsIndexRoute = AppVesselCallsIndexRouteImport.update({
   id: '/vessel-calls/',
   path: '/vessel-calls/',
@@ -90,96 +120,127 @@ const AppVesselCallsCallIdRoute = AppVesselCallsCallIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/alerts': typeof AppAlertsRoute
+  '/api-monitor': typeof AppApiMonitorRoute
+  '/ask': typeof AppAskRoute
   '/berths': typeof AppBerthsRoute
   '/cargo': typeof AppCargoRoute
   '/guide': typeof AppGuideRoute
   '/incidents': typeof AppIncidentsRoute
-  '/integrations': typeof AppIntegrationsRoute
   '/vessels': typeof AppVesselsRoute
   '/reports/$callId': typeof AppReportsCallIdRoute
+  '/submissions/$subId': typeof AppSubmissionsSubIdRoute
   '/vessel-calls/$callId': typeof AppVesselCallsCallIdRoute
   '/reports/': typeof AppReportsIndexRoute
+  '/submissions/': typeof AppSubmissionsIndexRoute
   '/vessel-calls/': typeof AppVesselCallsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/login': typeof LoginRoute
   '/access': typeof AppAccessRoute
+  '/alerts': typeof AppAlertsRoute
+  '/api-monitor': typeof AppApiMonitorRoute
+  '/ask': typeof AppAskRoute
   '/berths': typeof AppBerthsRoute
   '/cargo': typeof AppCargoRoute
   '/guide': typeof AppGuideRoute
   '/incidents': typeof AppIncidentsRoute
-  '/integrations': typeof AppIntegrationsRoute
   '/vessels': typeof AppVesselsRoute
   '/': typeof AppIndexRoute
   '/reports/$callId': typeof AppReportsCallIdRoute
+  '/submissions/$subId': typeof AppSubmissionsSubIdRoute
   '/vessel-calls/$callId': typeof AppVesselCallsCallIdRoute
   '/reports': typeof AppReportsIndexRoute
+  '/submissions': typeof AppSubmissionsIndexRoute
   '/vessel-calls': typeof AppVesselCallsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteRouteWithChildren
+  '/login': typeof LoginRoute
   '/_app/access': typeof AppAccessRoute
+  '/_app/alerts': typeof AppAlertsRoute
+  '/_app/api-monitor': typeof AppApiMonitorRoute
+  '/_app/ask': typeof AppAskRoute
   '/_app/berths': typeof AppBerthsRoute
   '/_app/cargo': typeof AppCargoRoute
   '/_app/guide': typeof AppGuideRoute
   '/_app/incidents': typeof AppIncidentsRoute
-  '/_app/integrations': typeof AppIntegrationsRoute
   '/_app/vessels': typeof AppVesselsRoute
   '/_app/': typeof AppIndexRoute
   '/_app/reports/$callId': typeof AppReportsCallIdRoute
+  '/_app/submissions/$subId': typeof AppSubmissionsSubIdRoute
   '/_app/vessel-calls/$callId': typeof AppVesselCallsCallIdRoute
   '/_app/reports/': typeof AppReportsIndexRoute
+  '/_app/submissions/': typeof AppSubmissionsIndexRoute
   '/_app/vessel-calls/': typeof AppVesselCallsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
     | '/access'
+    | '/alerts'
+    | '/api-monitor'
+    | '/ask'
     | '/berths'
     | '/cargo'
     | '/guide'
     | '/incidents'
-    | '/integrations'
     | '/vessels'
     | '/reports/$callId'
+    | '/submissions/$subId'
     | '/vessel-calls/$callId'
     | '/reports/'
+    | '/submissions/'
     | '/vessel-calls/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/login'
     | '/access'
+    | '/alerts'
+    | '/api-monitor'
+    | '/ask'
     | '/berths'
     | '/cargo'
     | '/guide'
     | '/incidents'
-    | '/integrations'
     | '/vessels'
     | '/'
     | '/reports/$callId'
+    | '/submissions/$subId'
     | '/vessel-calls/$callId'
     | '/reports'
+    | '/submissions'
     | '/vessel-calls'
   id:
     | '__root__'
     | '/_app'
+    | '/login'
     | '/_app/access'
+    | '/_app/alerts'
+    | '/_app/api-monitor'
+    | '/_app/ask'
     | '/_app/berths'
     | '/_app/cargo'
     | '/_app/guide'
     | '/_app/incidents'
-    | '/_app/integrations'
     | '/_app/vessels'
     | '/_app/'
     | '/_app/reports/$callId'
+    | '/_app/submissions/$subId'
     | '/_app/vessel-calls/$callId'
     | '/_app/reports/'
+    | '/_app/submissions/'
     | '/_app/vessel-calls/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AppRouteRoute: typeof AppRouteRouteWithChildren
+  LoginRoute: typeof LoginRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -189,6 +250,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AppRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/': {
@@ -203,6 +271,27 @@ declare module '@tanstack/react-router' {
       path: '/access'
       fullPath: '/access'
       preLoaderRoute: typeof AppAccessRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/alerts': {
+      id: '/_app/alerts'
+      path: '/alerts'
+      fullPath: '/alerts'
+      preLoaderRoute: typeof AppAlertsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/api-monitor': {
+      id: '/_app/api-monitor'
+      path: '/api-monitor'
+      fullPath: '/api-monitor'
+      preLoaderRoute: typeof AppApiMonitorRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/ask': {
+      id: '/_app/ask'
+      path: '/ask'
+      fullPath: '/ask'
+      preLoaderRoute: typeof AppAskRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/berths': {
@@ -233,13 +322,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIncidentsRouteImport
       parentRoute: typeof AppRouteRoute
     }
-    '/_app/integrations': {
-      id: '/_app/integrations'
-      path: '/integrations'
-      fullPath: '/integrations'
-      preLoaderRoute: typeof AppIntegrationsRouteImport
-      parentRoute: typeof AppRouteRoute
-    }
     '/_app/vessels': {
       id: '/_app/vessels'
       path: '/vessels'
@@ -261,6 +343,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReportsCallIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/submissions/': {
+      id: '/_app/submissions/'
+      path: '/submissions'
+      fullPath: '/submissions/'
+      preLoaderRoute: typeof AppSubmissionsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/submissions/$subId': {
+      id: '/_app/submissions/$subId'
+      path: '/submissions/$subId'
+      fullPath: '/submissions/$subId'
+      preLoaderRoute: typeof AppSubmissionsSubIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/vessel-calls/': {
       id: '/_app/vessel-calls/'
       path: '/vessel-calls'
@@ -280,31 +376,39 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteRouteChildren {
   AppAccessRoute: typeof AppAccessRoute
+  AppAlertsRoute: typeof AppAlertsRoute
+  AppApiMonitorRoute: typeof AppApiMonitorRoute
+  AppAskRoute: typeof AppAskRoute
   AppBerthsRoute: typeof AppBerthsRoute
   AppCargoRoute: typeof AppCargoRoute
   AppGuideRoute: typeof AppGuideRoute
   AppIncidentsRoute: typeof AppIncidentsRoute
-  AppIntegrationsRoute: typeof AppIntegrationsRoute
   AppVesselsRoute: typeof AppVesselsRoute
   AppIndexRoute: typeof AppIndexRoute
   AppReportsCallIdRoute: typeof AppReportsCallIdRoute
+  AppSubmissionsSubIdRoute: typeof AppSubmissionsSubIdRoute
   AppVesselCallsCallIdRoute: typeof AppVesselCallsCallIdRoute
   AppReportsIndexRoute: typeof AppReportsIndexRoute
+  AppSubmissionsIndexRoute: typeof AppSubmissionsIndexRoute
   AppVesselCallsIndexRoute: typeof AppVesselCallsIndexRoute
 }
 
 const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppAccessRoute: AppAccessRoute,
+  AppAlertsRoute: AppAlertsRoute,
+  AppApiMonitorRoute: AppApiMonitorRoute,
+  AppAskRoute: AppAskRoute,
   AppBerthsRoute: AppBerthsRoute,
   AppCargoRoute: AppCargoRoute,
   AppGuideRoute: AppGuideRoute,
   AppIncidentsRoute: AppIncidentsRoute,
-  AppIntegrationsRoute: AppIntegrationsRoute,
   AppVesselsRoute: AppVesselsRoute,
   AppIndexRoute: AppIndexRoute,
   AppReportsCallIdRoute: AppReportsCallIdRoute,
+  AppSubmissionsSubIdRoute: AppSubmissionsSubIdRoute,
   AppVesselCallsCallIdRoute: AppVesselCallsCallIdRoute,
   AppReportsIndexRoute: AppReportsIndexRoute,
+  AppSubmissionsIndexRoute: AppSubmissionsIndexRoute,
   AppVesselCallsIndexRoute: AppVesselCallsIndexRoute,
 }
 
@@ -314,6 +418,7 @@ const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   AppRouteRoute: AppRouteRouteWithChildren,
+  LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

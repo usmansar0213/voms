@@ -8,7 +8,7 @@ import { PageShell } from '@/components/layout/page-shell'
 import { berthOccupancyHours, etaVariance, HOUR, productivity, turnaround } from '../calc'
 import { fmtHours, fmtNum, fmtShort } from '../format'
 import { can } from '../roles'
-import { useVoms, visibleCalls } from '../store'
+import { useVoms, visibleCalls, useActor } from '../store'
 import { downloadCsv } from '../lib-export'
 import { BerthUtilizationChart, TurnaroundChart } from '../components/charts'
 import { PageHeader, StatTile, StatusBadge } from '../components/common'
@@ -19,7 +19,8 @@ const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.le
 export function Reports() {
   const state = useVoms()
   const calls = visibleCalls(state)
-  const { berths, vessels, role } = state
+  const { berths, vessels } = state
+  const actor = useActor()
   const vesselOf = (id: string) => vessels.find((v) => v.id === id)!
   const departed = calls.filter((c) => c.events.atd)
 
@@ -73,7 +74,7 @@ export function Reports() {
         title='KPIs & Reports'
         description='Indicators calculated from recorded events (BRD Section 4). Baselines and targets are TBC — figures here are simulated.'
         actions={
-          can(role, 'report.export') && (
+          can(actor, 'report.export') && (
             <Button variant='outline' onClick={exportCsv}>
               <Download /> Export CSV
             </Button>

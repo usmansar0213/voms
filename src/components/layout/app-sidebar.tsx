@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/sidebar'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { roleById } from '@/features/voms/roles'
+import { perspectiveMeta } from '@/features/voms/org'
 import { useVoms } from '@/features/voms/store'
 import { runAction } from '@/features/voms/components/common'
 import { sidebarData } from './data/sidebar-data'
@@ -23,7 +24,8 @@ import { NavGroup } from './nav-group'
 export function AppSidebar() {
   const { collapsible, variant } = useLayout()
   const { setOpenMobile } = useSidebar()
-  const role = useVoms((s) => s.role)
+  const session = useVoms((s) => s.session)
+  const perspective = useVoms((s) => s.perspective)
   const resetDemo = useVoms((s) => s.resetDemo)
   const [open, setOpen] = useState(false)
   return (
@@ -46,14 +48,18 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {sidebarData.navGroups.map((props) => (
-          <NavGroup key={props.title} {...props} />
+        {sidebarData.navGroups.map((g) => (
+          <NavGroup key={g.title} title={g.title} items={g.items.filter((i) => !i.only || i.only === perspective)} />
         ))}
       </SidebarContent>
       <SidebarFooter>
         <div className='rounded-md border border-dashed p-2 text-xs group-data-[collapsible=icon]:hidden'>
-          <div className='text-muted-foreground'>Viewing as</div>
-          <div className='font-medium'>{roleById[role].name}</div>
+          <div className='text-muted-foreground'>Signed in as</div>
+          <div className='font-medium'>{session?.name}</div>
+          <div className='text-muted-foreground'>
+            {session && roleById[session.role].name} · {session && perspectiveMeta[session.perspective].short}
+          </div>
+          <div className='text-muted-foreground'>Scope: {session?.scopeLabel}</div>
         </div>
         <SidebarMenu>
           <SidebarMenuItem>

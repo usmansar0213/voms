@@ -1,106 +1,117 @@
 import { useState } from 'react'
-import { Link } from '@tanstack/react-router'
-import { Container, Fuel, Mountain, RotateCcw } from 'lucide-react'
+import { useNavigate } from '@tanstack/react-router'
+import { LogIn, RotateCcw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ConfirmDialog } from '@/components/confirm-dialog'
 import { PageShell } from '@/components/layout/page-shell'
+import { perspectiveMeta } from '../org'
 import { roleById } from '../roles'
 import { useVoms } from '../store'
-import type { RoleId } from '../types'
+import type { Perspective, RoleId } from '../types'
 import { PageHeader, runAction } from '../components/common'
+import { buildSession } from './login'
 
-type Step = { role: RoleId; text: string; callId?: string }
+type Start = { orgId: string; role: RoleId; perspective: Perspective; scopeId?: string; to: string }
 
-const scenarios: { title: string; icon: typeof Container; summary: string; steps: Step[] }[] = [
+const scenarios: { title: string; summary: string; start: Start; steps: string[] }[] = [
   {
-    title: 'Scenario 1 — Container vessel',
-    icon: Container,
-    summary: 'Arrival to berthing, TEU-based production from a simulated TOS, and departure.',
+    title: 'Scenario 1 — Container upload & anomaly',
+    summary: 'Submission Coordinator, Container Terminal A',
+    start: { orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'submission', to: '/submissions' },
     steps: [
-      { role: 'harbor_master', callId: 'SB-2026-000126', text: 'Open the expected call and confirm the pre-assigned berth B-03 is compatible.' },
-      { role: 'admin', text: 'Integration Simulator → simulate AIS arrival detection for SB-2026-000126.' },
-      { role: 'harbor_master', callId: 'SB-2026-000126', text: 'Movements tab → verify the AIS-proposed ATA (source is shown as simulated).' },
-      { role: 'port_control', callId: 'SB-2026-000126', text: 'Record Pilot on board, First line and All Fast.' },
-      { role: 'terminal_operator', callId: 'SB-2026-000126', text: 'Record “Cargo operations commenced”, then add production in TEU.' },
-      { role: 'harbor_master', callId: 'SB-2026-000124', text: 'On a working container call, verify submitted production entries.' },
+      'Submission Center → choose sample “Anomaly: 0 containers” (or 1,000) → Process submission.',
+      'Review the extracted fields: confidence, source citation and the anomaly flag versus the typical ~100/day.',
+      'Correct “Total container moves” to 104 (discharge 61 + load 43); the anomaly and consistency flags clear. Submit for approval.',
+      'Switch to Management (session menu) → Submission Review → approve. The coordinator cannot approve their own report.',
+      'Dashboard trend now shows the published value; the anomaly alert can be resolved.',
     ],
   },
   {
-    title: 'Scenario 2 — Bulk carrier',
-    icon: Mountain,
-    summary: 'Coal discharge in metric tons, weather delay, final tally and vessel call closure.',
+    title: 'Scenario 2 — API failure & recovery',
+    summary: 'Submission Coordinator, Bulk Terminal B',
+    start: { orgId: 'ORG-TB', role: 'terminal_operator', perspective: 'submission', to: '/api-monitor' },
     steps: [
-      { role: 'management', callId: 'SB-2026-000122', text: 'Dashboard shows coal discharge at about 60% (15,000 of 25,000 MT). Open the call.' },
-      { role: 'terminal_operator', callId: 'SB-2026-000122', text: 'Cargo & Terminal tab → record a delay (e.g. rain) and more production.' },
-      { role: 'terminal_operator', callId: 'SB-2026-000120', text: 'The cement bulk call has operations completed; its final tally is already submitted.' },
-      { role: 'harbor_master', callId: 'SB-2026-000120', text: 'Verify remaining production and the final tally.' },
-      { role: 'port_control', callId: 'SB-2026-000120', text: 'Record Last line and ATD.' },
-      { role: 'harbor_master', callId: 'SB-2026-000120', text: 'Movements → Verify all, then Closure tab → close the vessel call. Open the integrated report.' },
+      'API Monitor shows Terminal B TOS degraded with mapping errors and queued retries.',
+      'Retry now: transport recovers but records stay held until mapping is fixed.',
+      'Sign in as System / Access Administrator (Submission) → Update mapping table; optionally Simulate failure on another connector.',
+      'Retry again → healthy; data freshness strip and the API alert update.',
     ],
   },
   {
-    title: 'Scenario 3 — Fuel / tanker',
-    icon: Fuel,
-    summary: 'Liquid cargo in kilolitres, dangerous-goods flag and an incident with corrective actions.',
+    title: 'Scenario 3 — Single-terminal manager',
+    summary: 'Terminal Operator, Management perspective, Terminal A only',
+    start: { orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'U-TA', to: '/' },
     steps: [
-      { role: 'port_control', callId: 'SB-2026-000123', text: 'Tanker at B-09 discharging gasoline and diesel (KL), flagged as dangerous goods.' },
-      { role: 'terminal_operator', callId: 'SB-2026-000123', text: 'Incidents tab → review INC-2026-0032 (manifold drip) and tick completed actions.' },
-      { role: 'shipping_agent', callId: 'SB-2026-000123', text: 'As shipping agent, incident details are restricted — only status is visible.' },
-      { role: 'harbor_master', text: 'Safety & Incidents → close the incident once all actions are complete.' },
-      { role: 'shipping_agent', text: 'Submit a new pre-arrival notice for a tanker; the duplicate check prevents double entry.' },
+      'Dashboard: KPIs, alerts and AI insight cards scoped to Terminal A.',
+      'Ask in the discussion box: “Why is container throughput lower this week?”',
+      'Ask about “Terminal B” — the assistant refuses because it is outside the scope.',
+    ],
+  },
+  {
+    title: 'Scenario 4 — Wider scopes without leakage',
+    summary: 'Multi-terminal manager, then port authority',
+    start: { orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'multi', to: '/' },
+    steps: [
+      'Multi-terminal scope shows Terminals A, B and C side by side (each in its own unit).',
+      'Sign out → Port Authority Management (Management): port-wide vessel traffic, throughput and risk.',
+      'Sign in as Shipping Agency B: only that agency’s vessel calls and alerts are visible.',
+    ],
+  },
+  {
+    title: 'Scenario 5 — Bulk & tanker calls, environment, integrated report',
+    summary: 'Harbor Master, Management perspective (port-wide)',
+    start: { orgId: 'ORG-SBMA', role: 'harbor_master', perspective: 'management', to: '/vessel-calls' },
+    steps: [
+      'Open SB-2026-000122 (coal, MT) and SB-2026-000123 (fuel, KL) — commodity-specific units.',
+      'Alerts: coal dust environmental alert and tanker manifold drip; acknowledge / resolve.',
+      'On SB-2026-000120: verify production and tally, then close the call (Port Control records Last Line and ATD in the Submission perspective).',
+      'Open the Integrated Vessel Call Report and print / save as PDF.',
     ],
   },
 ]
 
 export function Guide() {
-  const setRole = useVoms((s) => s.setRole)
+  const login = useVoms((s) => s.login)
   const resetDemo = useVoms((s) => s.resetDemo)
+  const navigate = useNavigate()
   const [confirm, setConfirm] = useState(false)
   return (
     <PageShell>
       <PageHeader
         title='Demo Guide'
-        description='Three walkthroughs for presenting VOMS to SBMA management on a laptop, tablet or phone.'
+        description='Five management demo scenarios from the Project Design Document. Every value is synthetic and labelled.'
         actions={
           <Button variant='outline' onClick={() => setConfirm(true)}>
             <RotateCcw /> Reset demo data
           </Button>
         }
       />
-
-      <div className='grid gap-4 lg:grid-cols-3'>
+      <div className='grid gap-4 lg:grid-cols-2'>
         {scenarios.map((s) => (
           <Card key={s.title}>
             <CardHeader>
-              <CardTitle className='flex items-center gap-2'>
-                <s.icon className='size-5' /> {s.title}
-              </CardTitle>
+              <CardTitle>{s.title}</CardTitle>
               <CardDescription>{s.summary}</CardDescription>
             </CardHeader>
-            <CardContent>
-              <ol className='grid gap-3'>
+            <CardContent className='grid gap-3'>
+              <ol className='grid gap-2 text-sm'>
                 {s.steps.map((st, i) => (
-                  <li key={i} className='grid grid-cols-[1.5rem_1fr] gap-2 text-sm'>
+                  <li key={i} className='grid grid-cols-[1.5rem_1fr] gap-2'>
                     <span className='flex size-6 items-center justify-center rounded-full bg-muted text-xs font-semibold'>{i + 1}</span>
-                    <div className='grid gap-1'>
-                      <span>{st.text}</span>
-                      <div className='flex flex-wrap gap-2'>
-                        <Button size='sm' variant='ghost' className='h-7 px-2 text-xs' onClick={() => runAction(() => setRole(st.role), `Now viewing as ${roleById[st.role].name}`)}>
-                          As {roleById[st.role].short}
-                        </Button>
-                        {st.callId && (
-                          <Button size='sm' variant='ghost' className='h-7 px-2 text-xs' asChild>
-                            <Link to='/vessel-calls/$callId' params={{ callId: st.callId }} onClick={() => setRole(st.role)}>
-                              Open {st.callId.slice(-6)}
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                    <span>{st}</span>
                   </li>
                 ))}
               </ol>
+              <Button
+                className='w-fit'
+                onClick={() => {
+                  login(buildSession(s.start.orgId, s.start.role, s.start.perspective, s.start.scopeId))
+                  navigate({ to: s.start.to })
+                }}
+              >
+                <LogIn /> Start as {roleById[s.start.role].short} · {perspectiveMeta[s.start.perspective].short}
+              </Button>
             </CardContent>
           </Card>
         ))}
@@ -112,13 +123,12 @@ export function Guide() {
             <CardTitle>What this mockup is — and is not</CardTitle>
           </CardHeader>
           <CardContent className='grid gap-2 text-sm'>
-            <p>An interactive illustration of the business requirements in the VOMS BRD (draft v0.1). It runs entirely in the browser and works offline once loaded.</p>
             <ul className='list-disc space-y-1 ps-5'>
-              <li>All vessels, IMO numbers, agencies, berths and figures are fictitious demo data.</li>
-              <li>Berths B-01 to B-15 are placeholders pending the official SBMA facility register.</li>
-              <li>No connection to SBMA, AIS, TOS or any government system. Integration is simulated and labelled as such.</li>
-              <li>Changes are stored only in this browser. “Reset demo data” restores the starting scenario.</li>
-              <li>Roles are switched without sign-in for presentation purposes only.</li>
+              <li>All vessels, IMO numbers, organizations, berths and figures are fictitious demo data.</li>
+              <li>AI extraction, insights and answers are rule-based simulations — no AI model is called and no file content is read.</li>
+              <li>API connectors are simulated. No connection to SBMA, AIS, TOS or government systems.</li>
+              <li>Demo sign-in has no password; production derives roles and scopes from the authenticated identity.</li>
+              <li>Data is stored only in this browser. “Reset demo data” restores the starting scenario.</li>
             </ul>
           </CardContent>
         </Card>
@@ -129,11 +139,14 @@ export function Guide() {
           <CardContent className='grid gap-2 text-sm'>
             <ul className='list-disc space-y-1 ps-5'>
               <li>
-                UI shell based on <a className='underline' href='https://github.com/satnaing/shadcn-admin' target='_blank' rel='noreferrer'>shadcn-admin</a> by Sat Naing (MIT)
+                UI shell based on{' '}
+                <a className='underline' href='https://github.com/satnaing/shadcn-admin' target='_blank' rel='noreferrer'>
+                  shadcn-admin
+                </a>{' '}
+                by Sat Naing (MIT)
               </li>
-              <li>shadcn/ui components, Radix UI, Tailwind CSS, TanStack Router & Table, Recharts, Zustand, date-fns, Sonner (MIT)</li>
-              <li>Lucide icons (ISC)</li>
-              <li>Event vocabulary informed by the DCSA Port Call / Just-in-Time standard and IALA S-211 Port Call Message concepts (reference only)</li>
+              <li>shadcn/ui, Radix UI, Tailwind CSS, TanStack Router, Recharts, Zustand, date-fns, Sonner (MIT); Lucide icons (ISC)</li>
+              <li>Event vocabulary informed by DCSA Port Call / JIT and IALA S-211 concepts (reference only)</li>
             </ul>
           </CardContent>
         </Card>
@@ -142,7 +155,7 @@ export function Guide() {
         open={confirm}
         onOpenChange={setConfirm}
         title='Reset demo data?'
-        desc='All changes made during this demo are discarded and the simulated vessel calls are regenerated relative to the current time.'
+        desc='All changes made during this demo are discarded and the simulated data is regenerated relative to the current time. You stay signed in.'
         confirmText='Reset'
         handleConfirm={() => {
           setConfirm(false)
