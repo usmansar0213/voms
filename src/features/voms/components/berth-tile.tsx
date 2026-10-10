@@ -1,15 +1,15 @@
 import { Link } from '@tanstack/react-router'
-import { Construction, Ship } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { BerthState } from '../calc'
 import { useVoms } from '../store'
 import type { Berth, VesselCall } from '../types'
 
-export const berthStateMeta: Record<BerthState, { label: string; className: string }> = {
-  occupied: { label: 'Occupied', className: 'border-[var(--series-1)] bg-[var(--series-1)]/12' },
-  planned: { label: 'Planned', className: 'border-dashed border-[var(--series-1)]/60' },
-  available: { label: 'Available', className: 'border-border' },
-  maintenance: { label: 'Restricted', className: 'border-[var(--status-warning)] bg-[var(--status-warning)]/10' },
+// Dot colour plus a text label, so state never relies on colour alone.
+export const berthStateMeta: Record<BerthState, { label: string; dot: string; className: string }> = {
+  occupied: { label: 'Occupied', dot: 'bg-[var(--status-critical)]', className: 'border-[var(--status-critical)]/40 bg-[var(--status-critical)]/5' },
+  planned: { label: 'Planned', dot: 'bg-[var(--series-1)]', className: 'border-[var(--series-1)]/40 border-dashed' },
+  available: { label: 'Available', dot: 'bg-[var(--status-good)]', className: 'border-border' },
+  maintenance: { label: 'Restricted', dot: 'bg-[var(--status-warning)]', className: 'border-[var(--status-warning)]/60 bg-[var(--status-warning)]/8' },
 }
 
 export function BerthTile({
@@ -26,11 +26,10 @@ export function BerthTile({
   const vessel = useVoms((s) => s.vessels.find((v) => v.id === occupant?.vesselId))
   const meta = berthStateMeta[state]
   const body = (
-    <div className={cn('flex h-full flex-col gap-0.5 rounded-md border-2 p-2 text-xs', meta.className)}>
-      <div className='flex items-center justify-between gap-1'>
+    <div className={cn('flex h-full flex-col gap-0.5 rounded-lg border bg-card p-2 text-xs sm:p-2.5', meta.className)}>
+      <div className='flex items-center gap-1.5'>
+        <span className={cn('size-2.5 shrink-0 rounded-full', meta.dot)} aria-hidden />
         <span className='font-semibold'>{berth.id}</span>
-        {state === 'occupied' && <Ship className='size-3.5' aria-hidden />}
-        {state === 'maintenance' && <Construction className='size-3.5' aria-hidden />}
       </div>
       <span className='text-muted-foreground'>{meta.label}</span>
       {!compact && vessel && <span className='truncate font-medium'>{vessel.name.replace(/^(MV|MT) DEMO /, '')}</span>}
@@ -38,7 +37,7 @@ export function BerthTile({
   )
   if (occupant)
     return (
-      <Link to='/vessel-calls/$callId' params={{ callId: occupant.id }} title={vessel?.name} className='block rounded-md hover:opacity-80'>
+      <Link to='/vessel-calls/$callId' params={{ callId: occupant.id }} title={vessel?.name} className='block rounded-lg hover:opacity-80'>
         {body}
       </Link>
     )

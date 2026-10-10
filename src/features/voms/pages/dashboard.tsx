@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Anchor, ArrowRight, ClipboardCheck, Package, Plus, Ship } from 'lucide-react'
+import { Anchor, ArrowRight, Package, Plus, Ship, TriangleAlert } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { PageShell } from '@/components/layout/page-shell'
@@ -13,11 +13,12 @@ import { useCan, useVoms, visibleCalls, visibleConnectors } from '../store'
 import { BerthUtilizationChart, TurnaroundChart } from '../components/charts'
 import { BerthTile } from '../components/berth-tile'
 import { NewCallDialog } from '../components/dialogs'
-import { AlertsPanel } from '../components/alerts-panel'
+import { AttentionList } from '../components/alerts-panel'
+import { scenarioColor, VesselArt } from '../components/vessel-art'
 import { DiscussionBox, InsightCards, SimulatedAiBadge } from '../components/ai-panel'
 import { TrendGrid } from '../components/trend-charts'
 import { ConnectorStrip } from '../components/connector-strip'
-import { PageHeader, ProgressBar, StatTile, StatusBadge } from '../components/common'
+import { PageHeader, ProgressBar, StatTile } from '../components/common'
 import { SubmissionHome } from './submission-home'
 
 export function Dashboard() {
@@ -29,7 +30,7 @@ function ManagementHome() {
   const state = useVoms()
   const session = state.session!
   const calls = visibleCalls(state)
-  const { vessels, incidents } = state
+  const { vessels } = state
   const berthIds = scopeBerths(session)
   const berths = berthIds ? state.berths.filter((b) => berthIds.includes(b.id)) : state.berths
   const navigate = useNavigate()
@@ -53,15 +54,14 @@ function ManagementHome() {
         c.production.some((p) => p.status !== 'verified') ||
         (c.finalTally && !c.finalTally.verifiedBy))
   )
-  const openIncidents = incidents.filter((i) => i.status !== 'closed' && calls.some((c) => c.id === i.callId))
 
   return (
     <PageShell>
       <PageHeader
-        title={`${roleById[session.role].name} — Management`}
+        title='Port Operations Dashboard'
         description={
           <>
-            {perspectiveMeta.management.label} · scope: {session.scopeLabel} · updated {fmtShort(new Date().toISOString())}
+            {roleById[session.role].name} · {perspectiveMeta.management.label} · {session.scopeLabel} · updated {fmtShort(new Date().toISOString())}
           </>
         }
         actions={
@@ -75,45 +75,114 @@ function ManagementHome() {
 
       <ConnectorStrip connectors={visibleConnectors(state)} />
 
-      <div className='grid grid-cols-2 gap-3 lg:grid-cols-4'>
-        <StatTile label='Expected vessels' value={expected.length} hint={expected[0] ? `Next ETA ${fmtRelative(expected[0].events.eta!.time)}` : 'None scheduled'} icon={Ship} onClick={() => navigate({ to: '/vessel-calls', search: { status: 'expected' } })} />
-        <StatTile label='Vessels at berth' value={atBerth.length} hint={`${berths.length} berths in scope`} icon={Anchor} onClick={() => navigate({ to: '/berths' })} />
-        <StatTile label='Cargo operations' value={working.length} hint={`${openIncidents.length} open incident(s)`} icon={Package} onClick={() => navigate({ to: '/vessel-calls', search: { status: 'operations' } })} />
-        <StatTile label='Pending verification' value={pending.length} hint='Calls with unverified records' icon={ClipboardCheck} onClick={() => navigate({ to: '/vessel-calls', search: { status: 'pending' } })} />
+      <div className='grid grid-cols-2 gap-3 xl:grid-cols-4'>
+        <StatTile tone='blue' label='Expected vessels' value={expected.length} hint={expected[0] ? `Next ETA ${fmtRelative(expected[0].events.eta!.time)}` : 'None scheduled'} icon={Ship} onClick={() => navigate({ to: '/vessel-calls', search: { status: 'expected' } })} />
+        <StatTile tone='green' label='Vessels at berth' value={atBerth.length} hint={`${berths.length} berths in scope`} icon={Anchor} onClick={() => navigate({ to: '/berths' })} />
+        <StatTile tone='amber' label='Cargo operations' value={working.length} hint='In progress now' icon={Package} onClick={() => navigate({ to: '/vessel-calls', search: { status: 'operations' } })} />
+        <StatTile tone='red' label='Pending verification' value={pending.length} hint='Calls with unverified records' icon={TriangleAlert} onClick={() => navigate({ to: '/vessel-calls', search: { status: 'pending' } })} />
       </div>
 
-      <div className='grid gap-4 lg:grid-cols-3'>
-        <Card className='lg:col-span-2'>
-          <CardHeader>
-            <CardTitle>AI insights</CardTitle>
-            <CardDescription>Material deviations in your scope, with period, source and validation status.</CardDescription>
-            <div>
-              <SimulatedAiBadge />
-            </div>
+      <div className='grid gap-4 xl:grid-cols-5'>
+        <Card className='gap-0 py-0 xl:col-span-3'>
+          <CardHeader className='border-b py-4'>
+            <CardTitle className='text-lg'>Cargo operations progress</CardTitle>
+            <CardDescription>Actual vs declared quantity per cargo line, in each commodity&apos;s own unit.</CardDescription>
           </CardHeader>
-          <CardContent className='grid gap-4'>
-            <InsightCards max={4} />
-            <div className='grid gap-2 border-t pt-4'>
-              <h3 className='text-sm font-semibold'>Discuss with VOMS</h3>
-              <DiscussionBox compact />
-            </div>
+          <CardContent className='px-0'>
+            {working.length === 0 && <p className='p-6 text-sm text-muted-foreground'>No cargo operations in progress in your scope.</p>}
+            <ul className='divide-y'>
+              {working.map((c) => {
+                const v = vesselOf(c.vesselId)
+                return (
+                  <li key={c.id}>
+                    <Link to='/vessel-calls/$callId' params={{ callId: c.id }} className='flex gap-3 px-4 py-4 hover:bg-accent/40 sm:gap-4 sm:px-6'>
+                      <VesselArt type={c.scenario} className='hidden sm:block' />
+                      <div className='grid min-w-0 flex-1 gap-2'>
+                        <div className='min-w-0'>
+                          <div className='truncate font-semibold'>{v.name}</div>
+                          <div className='text-xs text-muted-foreground'>
+                            {c.id} · {c.berthId} · {v.typeLabel}
+                          </div>
+                        </div>
+                        {c.cargo.map((l) => {
+                          const p = lineProgress(c, l.id)
+                          return (
+                            <div key={l.id} className='grid items-center gap-x-4 gap-y-1 text-sm md:grid-cols-[minmax(8rem,13rem)_minmax(4rem,1fr)_13.5rem]'>
+                              <span className='min-w-0'>
+                                {l.commodity} <span className='text-muted-foreground'>— {l.direction}</span>
+                              </span>
+                              <ProgressBar pct={p.pct} color={scenarioColor[c.scenario]} label={`${l.commodity} progress`} />
+                              <span className='text-xs whitespace-nowrap tabular-nums text-muted-foreground md:text-end md:text-sm'>
+                                <span className='font-medium text-foreground'>{fmtNum(p.pct)}%</span> · {fmtQty(p.done, l.unit)} / {fmtQty(l.declared, l.unit)}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Alerts</CardTitle>
-            <CardDescription>Scoped to your role and organization. An anomaly is a review flag, not proof of error.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <AlertsPanel limit={5} />
-          </CardContent>
-        </Card>
+
+        <div className='grid h-fit gap-4 xl:col-span-2'>
+          <Card>
+            <CardHeader>
+              <CardTitle className='text-lg'>Attention required</CardTitle>
+              <CardDescription>Rule-based flags from recorded data — review flags, not proof of error.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AttentionList limit={5} />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className='text-lg'>Berth status</CardTitle>
+              <CardDescription>{berths.length} placeholder berths — subject to SBMA facility register validation.</CardDescription>
+              <CardAction>
+                <Button variant='ghost' size='sm' asChild>
+                  <Link to='/berths'>
+                    Board <ArrowRight />
+                  </Link>
+                </Button>
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              <div className='grid grid-cols-3 gap-2 sm:grid-cols-5'>
+                {berths.map((b) => (
+                  <BerthTile key={b.id} berth={b} state={berthState(b, calls)} occupant={berthOccupant(b.id, calls)} compact />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className='text-lg'>AI insights</CardTitle>
+          <CardDescription>Material deviations in your scope, with period, source and validation status.</CardDescription>
+          <div>
+            <SimulatedAiBadge />
+          </div>
+        </CardHeader>
+        <CardContent className='grid gap-6 xl:grid-cols-5'>
+          <div className='xl:col-span-3'>
+            <InsightCards max={4} />
+          </div>
+          <div className='grid content-start gap-2 xl:col-span-2'>
+            <h3 className='text-sm font-semibold'>Discuss with VOMS</h3>
+            <DiscussionBox compact />
+          </div>
+        </CardContent>
+      </Card>
 
       {scopedUnits(state).some((u) => u.metric) && (
         <Card>
           <CardHeader>
-            <CardTitle>Daily throughput & traffic — last 14 days</CardTitle>
+            <CardTitle className='text-lg'>Daily throughput &amp; traffic — last 14 days</CardTitle>
             <CardDescription>From unit submissions. Each unit keeps its own measurement unit.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -123,55 +192,17 @@ function ManagementHome() {
       )}
 
       <div className='grid gap-4 lg:grid-cols-3'>
-        <Card className='lg:col-span-2'>
-          <CardHeader>
-            <CardTitle>Cargo operations progress</CardTitle>
-            <CardDescription>Actual vs declared quantity per cargo line, in each commodity's own unit.</CardDescription>
-          </CardHeader>
-          <CardContent className='grid gap-4'>
-            {working.length === 0 && <p className='text-sm text-muted-foreground'>No cargo operations in progress in your scope.</p>}
-            {working.map((c) => (
-              <Link key={c.id} to='/vessel-calls/$callId' params={{ callId: c.id }} className='grid gap-2 rounded-lg border p-3 hover:bg-accent/50'>
-                <div className='flex flex-wrap items-center justify-between gap-2'>
-                  <div className='min-w-0'>
-                    <div className='truncate font-semibold'>{vesselOf(c.vesselId).name}</div>
-                    <div className='text-xs text-muted-foreground'>
-                      {c.id} · {c.berthId} · {vesselOf(c.vesselId).typeLabel}
-                    </div>
-                  </div>
-                  <StatusBadge call={c} />
-                </div>
-                {c.cargo.map((l) => {
-                  const p = lineProgress(c, l.id)
-                  return (
-                    <div key={l.id} className='grid gap-1'>
-                      <div className='flex flex-wrap justify-between gap-x-3 text-sm'>
-                        <span>
-                          {l.commodity} — {l.direction}
-                        </span>
-                        <span className='tabular-nums'>
-                          <span className='font-semibold'>{fmtNum(p.pct)}%</span>
-                          <span className='text-muted-foreground'> · {fmtQty(p.done, l.unit)} / {fmtQty(l.declared, l.unit)}</span>
-                        </span>
-                      </div>
-                      <ProgressBar pct={p.pct} label={`${l.commodity} progress`} />
-                    </div>
-                  )
-                })}
-              </Link>
-            ))}
-          </CardContent>
-        </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Expected arrivals</CardTitle>
+            <CardTitle className='text-lg'>Expected arrivals</CardTitle>
             <CardDescription>Ordered by ETA.</CardDescription>
           </CardHeader>
           <CardContent className='grid gap-2'>
             {expected.length === 0 && <p className='text-sm text-muted-foreground'>No expected arrivals.</p>}
             {expected.map((c) => (
-              <Link key={c.id} to='/vessel-calls/$callId' params={{ callId: c.id }} className='flex items-center justify-between gap-2 rounded-md border p-2 text-sm hover:bg-accent/50'>
-                <div className='min-w-0'>
+              <Link key={c.id} to='/vessel-calls/$callId' params={{ callId: c.id }} className='flex items-center gap-3 rounded-md border p-2 text-sm hover:bg-accent/50'>
+                <VesselArt type={c.scenario} className='h-9 w-12' />
+                <div className='min-w-0 flex-1'>
                   <div className='truncate font-medium'>{vesselOf(c.vesselId).name}</div>
                   <div className='text-xs text-muted-foreground'>
                     {c.id} · req. {c.requestedBerthId ?? '—'}
@@ -185,33 +216,9 @@ function ManagementHome() {
             ))}
           </CardContent>
         </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Berth status</CardTitle>
-          <CardDescription>Placeholder berths in your scope — subject to SBMA facility register validation.</CardDescription>
-          <CardAction>
-            <Button variant='ghost' size='sm' asChild>
-              <Link to='/berths'>
-                Board <ArrowRight />
-              </Link>
-            </Button>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <div className='grid grid-cols-3 gap-2 sm:grid-cols-5 lg:grid-cols-8'>
-            {berths.map((b) => (
-              <BerthTile key={b.id} berth={b} state={berthState(b, calls)} occupant={berthOccupant(b.id, calls)} compact />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className='grid gap-4 lg:grid-cols-2'>
         <Card>
           <CardHeader>
-            <CardTitle>Vessel turnaround — recent departures</CardTitle>
+            <CardTitle className='text-lg'>Vessel turnaround</CardTitle>
             <CardDescription>ATA → ATD in hours (KPI-001), split by event interval.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -220,8 +227,8 @@ function ManagementHome() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Berth occupancy — last 7 days</CardTitle>
-            <CardDescription>Share of hours occupied (All Fast → Last Line) per berth.</CardDescription>
+            <CardTitle className='text-lg'>Berth occupancy — 7 days</CardTitle>
+            <CardDescription>All Fast → Last Line hours as a share of the period.</CardDescription>
           </CardHeader>
           <CardContent>
             <BerthUtilizationChart berths={berths} calls={calls} />

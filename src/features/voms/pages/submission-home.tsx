@@ -108,16 +108,16 @@ export function SubmissionHome() {
 
       <div className='grid grid-cols-2 gap-3 lg:grid-cols-4'>
         <StatTile label='Files submitted (30 days)' value={recent.length} hint={`${recent.filter((s) => s.channel === 'api').length} via API`} icon={FileStack} />
-        <StatTile label='Accepted' value={count(['approved'])} hint='Approved & published' icon={CheckCircle2} />
-        <StatTile label='Pending' value={count(['review', 'submitted'])} hint='In review or awaiting approval' icon={Clock} />
-        <StatTile label='Rejected / returned' value={count(['rejected'])} hint='Needs correction' icon={XCircle} />
+        <StatTile tone='green' label='Accepted' value={count(['approved'])} hint='Approved & published' icon={CheckCircle2} />
+        <StatTile tone='amber' label='Pending' value={count(['review', 'submitted'])} hint='In review or awaiting approval' icon={Clock} />
+        <StatTile tone='red' label='Rejected / returned' value={count(['rejected'])} hint='Needs correction' icon={XCircle} />
       </div>
       {conns.length > 0 && (
         <div className='grid grid-cols-2 gap-3 lg:grid-cols-4'>
           <StatTile label='API deliveries (24 h)' value={conns.reduce((a, c) => a + c.success24h, 0)} hint={`${conns.reduce((a, c) => a + c.failure24h, 0)} failed`} icon={PlugZap} />
-          <StatTile label='Last successful sync' value={lastSync ? fmtRelative(lastSync).replace(' ago', '') : '—'} hint='ago' icon={Clock} />
-          <StatTile label='Mapping errors' value={conns.reduce((a, c) => a + c.mappingErrors.length, 0)} hint={`${conns.reduce((a, c) => a + c.retryQueue, 0)} queued for retry`} icon={AlertTriangle} />
-          <StatTile label='Open anomalies' value={anomalies.length} hint='Review flags on submitted data' icon={AlertTriangle} />
+          <StatTile tone='green' label='Last successful sync' value={lastSync ? fmtRelative(lastSync).replace(' ago', '') : '—'} hint='ago' icon={Clock} />
+          <StatTile tone='amber' label='Mapping errors' value={conns.reduce((a, c) => a + c.mappingErrors.length, 0)} hint={`${conns.reduce((a, c) => a + c.retryQueue, 0)} queued for retry`} icon={AlertTriangle} />
+          <StatTile tone='red' label='Open anomalies' value={anomalies.length} hint='Review flags on submitted data' icon={AlertTriangle} />
         </div>
       )}
 

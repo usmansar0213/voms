@@ -107,3 +107,53 @@ export function AlertsPanel({ limit, showResolved = false }: { limit?: number; s
     </ul>
   )
 }
+
+const sevPill: Record<AlertSeverity, string> = {
+  info: 'bg-[var(--series-1)]/12 text-[var(--series-1-ink)]',
+  warning: 'bg-[var(--status-warning)]/22 text-[var(--status-warning-ink)]',
+  serious: 'bg-[var(--status-serious)]/20 text-[var(--status-serious-ink)]',
+  critical: 'bg-[var(--status-critical)]/15 text-[var(--status-critical-ink)]',
+}
+const sevLabel: Record<AlertSeverity, string> = { info: 'Low', warning: 'Medium', serious: 'High', critical: 'Critical' }
+
+/** Compact "Attention required" list: severity pill + one line per alert. */
+export function AttentionList({ limit = 5 }: { limit?: number }) {
+  const state = useVoms()
+  const list = visibleAlerts(state)
+    .filter((a) => a.status !== 'resolved')
+    .sort((a, b) => (a.status === 'open' ? 0 : 1) - (b.status === 'open' ? 0 : 1) || b.time.localeCompare(a.time))
+  if (!list.length)
+    return (
+      <div className='flex flex-col items-center gap-2 rounded-lg border border-dashed p-5 text-center text-sm text-muted-foreground'>
+        <BellOff className='size-5' />
+        No active alerts in your scope.
+      </div>
+    )
+  return (
+    <ul className='grid gap-2'>
+      {list.slice(0, limit).map((a) => (
+        <li key={a.id}>
+          <Link
+            to={a.callId ? '/vessel-calls/$callId' : '/alerts'}
+            params={a.callId ? { callId: a.callId } : undefined}
+            className='flex items-start gap-3 rounded-md p-1.5 text-sm hover:bg-accent/60'
+          >
+            <span className={`w-16 shrink-0 rounded-md px-2 py-0.5 text-center text-xs font-semibold ${sevPill[a.severity]}`}>{sevLabel[a.severity]}</span>
+            <span className='min-w-0'>
+              {a.callId && <span className='font-medium'>{a.callId} · </span>}
+              {a.title}
+              {a.status === 'acknowledged' && <span className='text-xs text-muted-foreground'> (acknowledged)</span>}
+            </span>
+          </Link>
+        </li>
+      ))}
+      {list.length > limit && (
+        <li>
+          <Button variant='ghost' size='sm' asChild>
+            <Link to='/alerts'>View all {list.length} alerts</Link>
+          </Button>
+        </li>
+      )}
+    </ul>
+  )
+}

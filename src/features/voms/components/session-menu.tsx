@@ -14,6 +14,15 @@ import { orgById, perspectiveMeta } from '../org'
 import { roleById } from '../roles'
 import { useVoms } from '../store'
 
+export const initials = (name: string) =>
+  name
+    .replace(/^Demo /, '')
+    .split(/\s+/)
+    .filter((w) => /^[A-Z]/.test(w))
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join('')
+
 /** Signed-in demo persona: shows role, perspective and scope; switches perspective. */
 export function SessionMenu() {
   const session = useVoms((s) => s.session)
@@ -26,13 +35,14 @@ export function SessionMenu() {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button variant='outline' size='sm' className='h-8 max-w-[10rem] gap-1.5 sm:max-w-none' aria-label='Demo session'>
-          <UserRound className='size-4 shrink-0' />
-          <span className='truncate sm:hidden'>
-            {role.short} · {perspectiveMeta[session.perspective].short[0]}
+        <Button variant='outline' className='h-9 gap-2 rounded-full bg-muted/60 px-2 sm:px-3' aria-label='Demo session'>
+          <span className='flex size-6 items-center justify-center rounded-full bg-[var(--series-1)]/15 text-[11px] font-semibold text-[var(--series-1-ink)] sm:hidden'>
+            {initials(session.name)}
           </span>
-          <span className='hidden truncate sm:inline'>
-            {role.short} · {perspectiveMeta[session.perspective].short}
+          <span className='hidden text-xs text-muted-foreground md:inline'>Viewing as</span>
+          <UserRound className='hidden size-4 shrink-0 sm:block' />
+          <span className='hidden max-w-[12rem] truncate font-medium sm:inline xl:max-w-[22rem]'>
+            {role.name} · {perspectiveMeta[session.perspective].short}
           </span>
           <ChevronsUpDown className='size-3.5 shrink-0 opacity-60' />
         </Button>
@@ -66,5 +76,16 @@ export function SessionMenu() {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
+  )
+}
+
+/** Initials avatar shown next to the session menu on larger screens. */
+export function SessionAvatar() {
+  const name = useVoms((s) => s.session?.name)
+  if (!name) return null
+  return (
+    <span className='hidden size-9 shrink-0 items-center justify-center rounded-full bg-[var(--series-1)]/15 text-xs font-semibold text-[var(--series-1-ink)] sm:flex' title={name}>
+      {initials(name)}
+    </span>
   )
 }

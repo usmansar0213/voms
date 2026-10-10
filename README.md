@@ -30,7 +30,7 @@ A record is never approved from the perspective that created it, and a submitter
 | AI insight cards and a contextual discussion box (rule-based, clearly labelled simulation) | PDD §7 |
 | Vessel calls, berths, cargo in commodity units, incidents, closure, audit trail, integrated report | BRD §8–16 |
 
-The Demo Guide covers the five PDD scenarios, with a start button for each. The layout is mobile-first, and every journey works on a phone.
+The Demo Guide covers the five PDD scenarios, with a start button for each. You can also link straight into a persona with `#/login?as=<key>`, where the key is one of `ta-coordinator`, `tb-coordinator`, `ta-manager`, `terminal-group`, `port-authority` or `harbor-master`. The layout is mobile-first, and every journey works on a phone.
 
 ## Run locally
 

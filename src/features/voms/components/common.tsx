@@ -86,14 +86,28 @@ export function DemoBadge({ className }: { className?: string }) {
 
 export function PageHeader({ title, description, actions }: { title: string; description?: ReactNode; actions?: ReactNode }) {
   return (
-    <div className='flex flex-wrap items-end justify-between gap-3'>
+    <div className='flex flex-wrap items-start justify-between gap-3'>
       <div className='min-w-0'>
-        <h1 className='text-xl font-bold tracking-tight sm:text-2xl'>{title}</h1>
-        {description && <p className='mt-1 text-sm text-muted-foreground'>{description}</p>}
+        <h1 className='text-2xl font-bold tracking-tight sm:text-3xl'>{title}</h1>
+        {description && <p className='mt-1 text-sm text-muted-foreground sm:text-base'>{description}</p>}
       </div>
-      {actions && <div className='flex flex-wrap gap-2'>{actions}</div>}
+      <div className='flex flex-wrap items-center gap-2'>
+        {actions}
+        <span className='hidden rounded-full bg-[var(--status-good)]/12 px-3 py-1 text-xs font-semibold tracking-wide text-[var(--status-good-ink)] sm:inline-block'>
+          DEMO DATA
+        </span>
+      </div>
     </div>
   )
+}
+
+export type TileTone = 'blue' | 'green' | 'amber' | 'red' | 'violet'
+const tileTone: Record<TileTone, string> = {
+  blue: 'bg-[var(--series-1)]/12 text-[var(--series-1-ink)]',
+  green: 'bg-[var(--status-good)]/12 text-[var(--status-good-ink)]',
+  amber: 'bg-[var(--status-warning)]/18 text-[var(--status-warning-ink)]',
+  red: 'bg-[var(--status-critical)]/12 text-[var(--status-critical-ink)]',
+  violet: 'bg-[var(--series-7)]/12 text-[var(--series-7)]',
 }
 
 export function StatTile({
@@ -101,12 +115,14 @@ export function StatTile({
   value,
   hint,
   icon: Icon,
+  tone = 'blue',
   onClick,
 }: {
   label: string
   value: ReactNode
   hint?: ReactNode
   icon: LucideIcon
+  tone?: TileTone
   onClick?: () => void
 }) {
   const Comp = onClick ? 'button' : 'div'
@@ -114,22 +130,24 @@ export function StatTile({
     <Comp
       onClick={onClick}
       className={cn(
-        'flex flex-col gap-1 rounded-xl border bg-card p-4 text-start shadow-xs',
+        'flex min-w-0 items-center gap-3 rounded-xl border bg-card p-3 text-start shadow-xs sm:gap-4 sm:p-4',
         onClick && 'transition-colors hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none'
       )}
     >
-      <div className='flex items-center justify-between gap-2 text-sm text-muted-foreground'>
-        <span>{label}</span>
-        <Icon className='size-4' aria-hidden />
-      </div>
-      <div className='text-3xl font-bold tabular-nums'>{value}</div>
-      {hint && <div className='text-xs text-muted-foreground'>{hint}</div>}
+      <span className={cn('hidden size-12 shrink-0 items-center justify-center rounded-full sm:flex sm:size-14', tileTone[tone])}>
+        <Icon className='size-6 sm:size-7' aria-hidden />
+      </span>
+      <span className='grid min-w-0 gap-0.5'>
+        <span className='text-sm text-muted-foreground sm:text-base sm:text-foreground'>{label}</span>
+        <span className='text-2xl font-bold tabular-nums sm:text-3xl'>{value}</span>
+        {hint && <span className='text-xs text-muted-foreground sm:text-sm'>{hint}</span>}
+      </span>
     </Comp>
   )
 }
 
 /** Completed vs remaining bar with a 2px surface gap between segments. */
-export function ProgressBar({ pct, className, label }: { pct: number; className?: string; label?: string }) {
+export function ProgressBar({ pct, className, label, color = 'var(--series-1)' }: { pct: number; className?: string; label?: string; color?: string }) {
   const p = Math.max(0, Math.min(100, pct))
   return (
     <div
@@ -140,7 +158,7 @@ export function ProgressBar({ pct, className, label }: { pct: number; className?
       aria-label={label}
       className={cn('flex h-2.5 w-full gap-0.5', className)}
     >
-      {p > 0 && <div className='h-full rounded-s-full bg-[var(--series-1)] last:rounded-e-full' style={{ width: `${p}%` }} />}
+      {p > 0 && <div className='h-full rounded-s-full last:rounded-e-full' style={{ width: `${p}%`, background: color }} />}
       {p < 100 && <div className='h-full flex-1 rounded-e-full bg-muted first:rounded-s-full' />}
     </div>
   )

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { useNavigate } from '@tanstack/react-router'
+import { useEffect, useMemo, useState } from 'react'
+import { getRouteApi, useNavigate } from '@tanstack/react-router'
 import { Building2, Info, LogIn, Ship } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -14,6 +14,7 @@ import type { Perspective, RoleId, Session } from '../types'
 import { DemoBadge } from '../components/common'
 
 export interface Persona {
+  key: string
   label: string
   hint: string
   orgId: string
@@ -23,12 +24,12 @@ export interface Persona {
 }
 
 export const personas: Persona[] = [
-  { label: 'Container terminal coordinator', hint: 'Scenario 1 — upload & anomaly', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'submission' },
-  { label: 'Terminal B coordinator', hint: 'Scenario 2 — API failure', orgId: 'ORG-TB', role: 'terminal_operator', perspective: 'submission' },
-  { label: 'Single-terminal manager', hint: 'Scenario 3 — KPIs, AI & Q&A', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'U-TA' },
-  { label: 'Multi-terminal manager', hint: 'Scenario 4 — wider scope', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'multi' },
-  { label: 'Port authority management', hint: 'Scenario 4/5 — port-wide', orgId: 'ORG-SBMA', role: 'management', perspective: 'management' },
-  { label: 'Harbor master (management)', hint: 'Scenario 5 — verify & close', orgId: 'ORG-SBMA', role: 'harbor_master', perspective: 'management' },
+  { key: 'ta-coordinator', label: 'Container terminal coordinator', hint: 'Scenario 1 — upload & anomaly', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'submission' },
+  { key: 'tb-coordinator', label: 'Terminal B coordinator', hint: 'Scenario 2 — API failure', orgId: 'ORG-TB', role: 'terminal_operator', perspective: 'submission' },
+  { key: 'ta-manager', label: 'Single-terminal manager', hint: 'Scenario 3 — KPIs, AI & Q&A', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'U-TA' },
+  { key: 'terminal-group', label: 'Multi-terminal manager', hint: 'Scenario 4 — wider scope', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'multi' },
+  { key: 'port-authority', label: 'Port authority management', hint: 'Scenario 4/5 — port-wide', orgId: 'ORG-SBMA', role: 'management', perspective: 'management' },
+  { key: 'harbor-master', label: 'Harbor master (management)', hint: 'Scenario 5 — verify & close', orgId: 'ORG-SBMA', role: 'harbor_master', perspective: 'management' },
 ]
 
 export function buildSession(orgId: string, role: RoleId, perspective: Perspective, scopeId?: string, name?: string): Session {
@@ -37,9 +38,19 @@ export function buildSession(orgId: string, role: RoleId, perspective: Perspecti
   return { name: name?.trim() || defaultName(role, perspective, orgId), orgId, role, perspective, scopeUnitIds: scope.unitIds, scopeLabel: scope.label }
 }
 
+const route = getRouteApi('/login')
+
 export function Login() {
   const login = useVoms((s) => s.login)
   const navigate = useNavigate()
+  const { as } = route.useSearch()
+  useEffect(() => {
+    const p = personas.find((x) => x.key === as)
+    if (p) {
+      login(buildSession(p.orgId, p.role, p.perspective, p.scopeId))
+      navigate({ to: '/', replace: true })
+    }
+  }, [as, login, navigate])
   const [orgId, setOrgId] = useState('ORG-TA')
   const [role, setRole] = useState<RoleId>('terminal_operator')
   const [perspective, setPerspective] = useState<Perspective>('submission')

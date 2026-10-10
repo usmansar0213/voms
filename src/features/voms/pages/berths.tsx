@@ -90,7 +90,10 @@ export function Berths() {
                 <CardHeader className='px-4'>
                   <CardTitle className='flex items-center justify-between'>
                     <span>{b.name}</span>
-                    <span className='text-xs font-normal text-muted-foreground'>{berthStateMeta[st].label}</span>
+                    <span className='flex items-center gap-1.5 text-xs font-normal text-muted-foreground'>
+                      <span className={cn('size-2.5 rounded-full', berthStateMeta[st].dot)} aria-hidden />
+                      {berthStateMeta[st].label}
+                    </span>
                   </CardTitle>
                   <CardDescription>
                     Max LOA {b.maxLoa} m · max draft {b.maxDraft} m · {b.accepts.map((a) => scenarioLabel[a]).join(', ')}
