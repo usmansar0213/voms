@@ -20,7 +20,15 @@ import { Route as AppBerthsRouteImport } from './routes/_app/berths'
 import { Route as AppCargoRouteImport } from './routes/_app/cargo'
 import { Route as AppGuideRouteImport } from './routes/_app/guide'
 import { Route as AppIncidentsRouteImport } from './routes/_app/incidents'
+import { Route as AppOperationsRouteImport } from './routes/_app/operations'
+import { Route as AppPerformanceRouteImport } from './routes/_app/performance'
+import { Route as AppTerminalsRouteImport } from './routes/_app/terminals'
+import { Route as AppVesselIntelligenceRouteImport } from './routes/_app/vessel-intelligence'
 import { Route as AppVesselsRouteImport } from './routes/_app/vessels'
+import { Route as AppActionsIndexRouteImport } from './routes/_app/actions/index'
+import { Route as AppActionsActionIdRouteImport } from './routes/_app/actions/$actionId'
+import { Route as AppKpisIndexRouteImport } from './routes/_app/kpis/index'
+import { Route as AppKpisKpiIdRouteImport } from './routes/_app/kpis/$kpiId'
 import { Route as AppReportsIndexRouteImport } from './routes/_app/reports/index'
 import { Route as AppReportsCallIdRouteImport } from './routes/_app/reports/$callId'
 import { Route as AppSubmissionsIndexRouteImport } from './routes/_app/submissions/index'
@@ -82,9 +90,49 @@ const AppIncidentsRoute = AppIncidentsRouteImport.update({
   path: '/incidents',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppOperationsRoute = AppOperationsRouteImport.update({
+  id: '/operations',
+  path: '/operations',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppPerformanceRoute = AppPerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppTerminalsRoute = AppTerminalsRouteImport.update({
+  id: '/terminals',
+  path: '/terminals',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppVesselIntelligenceRoute = AppVesselIntelligenceRouteImport.update({
+  id: '/vessel-intelligence',
+  path: '/vessel-intelligence',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppVesselsRoute = AppVesselsRouteImport.update({
   id: '/vessels',
   path: '/vessels',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppActionsIndexRoute = AppActionsIndexRouteImport.update({
+  id: '/actions/',
+  path: '/actions/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppActionsActionIdRoute = AppActionsActionIdRouteImport.update({
+  id: '/actions/$actionId',
+  path: '/actions/$actionId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppKpisIndexRoute = AppKpisIndexRouteImport.update({
+  id: '/kpis/',
+  path: '/kpis/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppKpisKpiIdRoute = AppKpisKpiIdRouteImport.update({
+  id: '/kpis/$kpiId',
+  path: '/kpis/$kpiId',
   getParentRoute: () => AppRouteRoute,
 } as any)
 const AppReportsIndexRoute = AppReportsIndexRouteImport.update({
@@ -129,10 +177,18 @@ export interface FileRoutesByFullPath {
   '/cargo': typeof AppCargoRoute
   '/guide': typeof AppGuideRoute
   '/incidents': typeof AppIncidentsRoute
+  '/operations': typeof AppOperationsRoute
+  '/performance': typeof AppPerformanceRoute
+  '/terminals': typeof AppTerminalsRoute
+  '/vessel-intelligence': typeof AppVesselIntelligenceRoute
   '/vessels': typeof AppVesselsRoute
+  '/actions/$actionId': typeof AppActionsActionIdRoute
+  '/kpis/$kpiId': typeof AppKpisKpiIdRoute
   '/reports/$callId': typeof AppReportsCallIdRoute
   '/submissions/$subId': typeof AppSubmissionsSubIdRoute
   '/vessel-calls/$callId': typeof AppVesselCallsCallIdRoute
+  '/actions/': typeof AppActionsIndexRoute
+  '/kpis/': typeof AppKpisIndexRoute
   '/reports/': typeof AppReportsIndexRoute
   '/submissions/': typeof AppSubmissionsIndexRoute
   '/vessel-calls/': typeof AppVesselCallsIndexRoute
@@ -147,11 +203,19 @@ export interface FileRoutesByTo {
   '/cargo': typeof AppCargoRoute
   '/guide': typeof AppGuideRoute
   '/incidents': typeof AppIncidentsRoute
+  '/operations': typeof AppOperationsRoute
+  '/performance': typeof AppPerformanceRoute
+  '/terminals': typeof AppTerminalsRoute
+  '/vessel-intelligence': typeof AppVesselIntelligenceRoute
   '/vessels': typeof AppVesselsRoute
   '/': typeof AppIndexRoute
+  '/actions/$actionId': typeof AppActionsActionIdRoute
+  '/kpis/$kpiId': typeof AppKpisKpiIdRoute
   '/reports/$callId': typeof AppReportsCallIdRoute
   '/submissions/$subId': typeof AppSubmissionsSubIdRoute
   '/vessel-calls/$callId': typeof AppVesselCallsCallIdRoute
+  '/actions': typeof AppActionsIndexRoute
+  '/kpis': typeof AppKpisIndexRoute
   '/reports': typeof AppReportsIndexRoute
   '/submissions': typeof AppSubmissionsIndexRoute
   '/vessel-calls': typeof AppVesselCallsIndexRoute
@@ -168,11 +232,19 @@ export interface FileRoutesById {
   '/_app/cargo': typeof AppCargoRoute
   '/_app/guide': typeof AppGuideRoute
   '/_app/incidents': typeof AppIncidentsRoute
+  '/_app/operations': typeof AppOperationsRoute
+  '/_app/performance': typeof AppPerformanceRoute
+  '/_app/terminals': typeof AppTerminalsRoute
+  '/_app/vessel-intelligence': typeof AppVesselIntelligenceRoute
   '/_app/vessels': typeof AppVesselsRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/actions/$actionId': typeof AppActionsActionIdRoute
+  '/_app/kpis/$kpiId': typeof AppKpisKpiIdRoute
   '/_app/reports/$callId': typeof AppReportsCallIdRoute
   '/_app/submissions/$subId': typeof AppSubmissionsSubIdRoute
   '/_app/vessel-calls/$callId': typeof AppVesselCallsCallIdRoute
+  '/_app/actions/': typeof AppActionsIndexRoute
+  '/_app/kpis/': typeof AppKpisIndexRoute
   '/_app/reports/': typeof AppReportsIndexRoute
   '/_app/submissions/': typeof AppSubmissionsIndexRoute
   '/_app/vessel-calls/': typeof AppVesselCallsIndexRoute
@@ -190,10 +262,18 @@ export interface FileRouteTypes {
     | '/cargo'
     | '/guide'
     | '/incidents'
+    | '/operations'
+    | '/performance'
+    | '/terminals'
+    | '/vessel-intelligence'
     | '/vessels'
+    | '/actions/$actionId'
+    | '/kpis/$kpiId'
     | '/reports/$callId'
     | '/submissions/$subId'
     | '/vessel-calls/$callId'
+    | '/actions/'
+    | '/kpis/'
     | '/reports/'
     | '/submissions/'
     | '/vessel-calls/'
@@ -208,11 +288,19 @@ export interface FileRouteTypes {
     | '/cargo'
     | '/guide'
     | '/incidents'
+    | '/operations'
+    | '/performance'
+    | '/terminals'
+    | '/vessel-intelligence'
     | '/vessels'
     | '/'
+    | '/actions/$actionId'
+    | '/kpis/$kpiId'
     | '/reports/$callId'
     | '/submissions/$subId'
     | '/vessel-calls/$callId'
+    | '/actions'
+    | '/kpis'
     | '/reports'
     | '/submissions'
     | '/vessel-calls'
@@ -228,11 +316,19 @@ export interface FileRouteTypes {
     | '/_app/cargo'
     | '/_app/guide'
     | '/_app/incidents'
+    | '/_app/operations'
+    | '/_app/performance'
+    | '/_app/terminals'
+    | '/_app/vessel-intelligence'
     | '/_app/vessels'
     | '/_app/'
+    | '/_app/actions/$actionId'
+    | '/_app/kpis/$kpiId'
     | '/_app/reports/$callId'
     | '/_app/submissions/$subId'
     | '/_app/vessel-calls/$callId'
+    | '/_app/actions/'
+    | '/_app/kpis/'
     | '/_app/reports/'
     | '/_app/submissions/'
     | '/_app/vessel-calls/'
@@ -322,11 +418,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIncidentsRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/operations': {
+      id: '/_app/operations'
+      path: '/operations'
+      fullPath: '/operations'
+      preLoaderRoute: typeof AppOperationsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/performance': {
+      id: '/_app/performance'
+      path: '/performance'
+      fullPath: '/performance'
+      preLoaderRoute: typeof AppPerformanceRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/terminals': {
+      id: '/_app/terminals'
+      path: '/terminals'
+      fullPath: '/terminals'
+      preLoaderRoute: typeof AppTerminalsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/vessel-intelligence': {
+      id: '/_app/vessel-intelligence'
+      path: '/vessel-intelligence'
+      fullPath: '/vessel-intelligence'
+      preLoaderRoute: typeof AppVesselIntelligenceRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/vessels': {
       id: '/_app/vessels'
       path: '/vessels'
       fullPath: '/vessels'
       preLoaderRoute: typeof AppVesselsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/actions/': {
+      id: '/_app/actions/'
+      path: '/actions'
+      fullPath: '/actions/'
+      preLoaderRoute: typeof AppActionsIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/actions/$actionId': {
+      id: '/_app/actions/$actionId'
+      path: '/actions/$actionId'
+      fullPath: '/actions/$actionId'
+      preLoaderRoute: typeof AppActionsActionIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/kpis/': {
+      id: '/_app/kpis/'
+      path: '/kpis'
+      fullPath: '/kpis/'
+      preLoaderRoute: typeof AppKpisIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/kpis/$kpiId': {
+      id: '/_app/kpis/$kpiId'
+      path: '/kpis/$kpiId'
+      fullPath: '/kpis/$kpiId'
+      preLoaderRoute: typeof AppKpisKpiIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
     '/_app/reports/': {
@@ -383,11 +535,19 @@ interface AppRouteRouteChildren {
   AppCargoRoute: typeof AppCargoRoute
   AppGuideRoute: typeof AppGuideRoute
   AppIncidentsRoute: typeof AppIncidentsRoute
+  AppOperationsRoute: typeof AppOperationsRoute
+  AppPerformanceRoute: typeof AppPerformanceRoute
+  AppTerminalsRoute: typeof AppTerminalsRoute
+  AppVesselIntelligenceRoute: typeof AppVesselIntelligenceRoute
   AppVesselsRoute: typeof AppVesselsRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppActionsActionIdRoute: typeof AppActionsActionIdRoute
+  AppKpisKpiIdRoute: typeof AppKpisKpiIdRoute
   AppReportsCallIdRoute: typeof AppReportsCallIdRoute
   AppSubmissionsSubIdRoute: typeof AppSubmissionsSubIdRoute
   AppVesselCallsCallIdRoute: typeof AppVesselCallsCallIdRoute
+  AppActionsIndexRoute: typeof AppActionsIndexRoute
+  AppKpisIndexRoute: typeof AppKpisIndexRoute
   AppReportsIndexRoute: typeof AppReportsIndexRoute
   AppSubmissionsIndexRoute: typeof AppSubmissionsIndexRoute
   AppVesselCallsIndexRoute: typeof AppVesselCallsIndexRoute
@@ -402,11 +562,19 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppCargoRoute: AppCargoRoute,
   AppGuideRoute: AppGuideRoute,
   AppIncidentsRoute: AppIncidentsRoute,
+  AppOperationsRoute: AppOperationsRoute,
+  AppPerformanceRoute: AppPerformanceRoute,
+  AppTerminalsRoute: AppTerminalsRoute,
+  AppVesselIntelligenceRoute: AppVesselIntelligenceRoute,
   AppVesselsRoute: AppVesselsRoute,
   AppIndexRoute: AppIndexRoute,
+  AppActionsActionIdRoute: AppActionsActionIdRoute,
+  AppKpisKpiIdRoute: AppKpisKpiIdRoute,
   AppReportsCallIdRoute: AppReportsCallIdRoute,
   AppSubmissionsSubIdRoute: AppSubmissionsSubIdRoute,
   AppVesselCallsCallIdRoute: AppVesselCallsCallIdRoute,
+  AppActionsIndexRoute: AppActionsIndexRoute,
+  AppKpisIndexRoute: AppKpisIndexRoute,
   AppReportsIndexRoute: AppReportsIndexRoute,
   AppSubmissionsIndexRoute: AppSubmissionsIndexRoute,
   AppVesselCallsIndexRoute: AppVesselCallsIndexRoute,

@@ -16,56 +16,53 @@ type Start = { orgId: string; role: RoleId; perspective: Perspective; scopeId?: 
 
 const scenarios: { title: string; summary: string; start: Start; steps: string[] }[] = [
   {
-    title: 'Scenario 1 — Container upload & anomaly',
-    summary: 'Submission Coordinator, Container Terminal A',
+    title: 'Scenario 1 — Monthly executive review',
+    summary: 'Port Authority Executive · port-wide',
+    start: { orgId: 'ORG-SBMA', role: 'management', perspective: 'management', to: '/' },
+    steps: [
+      'Executive Overview: KPI achievement vs illustrative targets for the latest month; change the month with the period selector.',
+      'Read the executive summary: verified facts, inferred interpretation and proposed actions.',
+      'Open Strategic KPIs → a KPI off target → definition, 24-month trend, terminal breakdown.',
+      'Terminal Intelligence: benchmark the three terminals on comparable KPIs (throughput stays in TEU / MT / KL).',
+    ],
+  },
+  {
+    title: 'Scenario 2 — KPI breach → action → outcome',
+    summary: 'Port Operations Manager (Harbor Master) · port-wide',
+    start: { orgId: 'ORG-SBMA', role: 'harbor_master', perspective: 'management', to: '/alerts' },
+    steps: [
+      'Alerts & Risks: open the “Waiting time off target — Terminal B” KPI-breach alert → Create action (baseline captured).',
+      'Management Actions: follow ACT-2026-0012 (in progress) and the blocked ACT-2026-0014 (overdue).',
+      'Mark an action done, then sign in as Port Authority Executive to review the outcome against the KPI and close it — the owner cannot assess their own outcome.',
+    ],
+  },
+  {
+    title: 'Scenario 3 — Terminal view & confidentiality',
+    summary: 'Terminal Manager · Terminal A only, then the terminal group',
+    start: { orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'U-TA', to: '/terminals' },
+    steps: [
+      'Terminal Intelligence shows Terminal A named and a port average — peer terminals are not shown individually.',
+      'AI Intelligence: ask about “Terminal B” — the assistant refuses because it is outside the scope.',
+      'Sign out → Terminal Group Manager to see A, B and C side by side.',
+    ],
+  },
+  {
+    title: 'Scenario 4 — Data quality & integration',
+    summary: 'Data Steward (Terminal A), then Integration Administrator',
     start: { orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'submission', to: '/submissions' },
     steps: [
-      'Submission Center → choose sample “Anomaly: 0 containers” (or 1,000) → Process submission.',
-      'Review the extracted fields: confidence, source citation and the anomaly flag versus the typical ~100/day.',
-      'Correct “Total container moves” to 104 (discharge 61 + load 43); the anomaly and consistency flags clear. Submit for approval.',
-      'Switch to Management (session menu) → Submission Review → approve. The coordinator cannot approve their own report.',
-      'Dashboard trend now shows the published value; the anomaly alert can be resolved.',
+      'Submissions → sample “Anomaly: 1,000 containers” → Process → anomaly and consistency flags; correct the total to 104 and submit.',
+      'Switch to Management (session menu) → approve; the coordinator cannot approve their own report.',
+      'Sign in as Integration Administrator → API integration monitor: Terminal B TOS degraded → Update mapping table → Retry.',
     ],
   },
   {
-    title: 'Scenario 2 — API failure & recovery',
-    summary: 'Submission Coordinator, Bulk Terminal B',
-    start: { orgId: 'ORG-TB', role: 'terminal_operator', perspective: 'submission', to: '/api-monitor' },
+    title: 'Scenario 5 — From strategy to a single vessel call',
+    summary: 'Port Operations Manager · drill-down',
+    start: { orgId: 'ORG-SBMA', role: 'harbor_master', perspective: 'management', to: '/vessel-intelligence' },
     steps: [
-      'API Monitor shows Terminal B TOS degraded with mapping errors and queued retries.',
-      'Retry now: transport recovers but records stay held until mapping is fixed.',
-      'Sign in as System / Access Administrator (Submission) → Update mapping table; optionally Simulate failure on another connector.',
-      'Retry again → healthy; data freshness strip and the API alert update.',
-    ],
-  },
-  {
-    title: 'Scenario 3 — Single-terminal manager',
-    summary: 'Terminal Operator, Management perspective, Terminal A only',
-    start: { orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'U-TA', to: '/' },
-    steps: [
-      'Dashboard: KPIs, alerts and AI insight cards scoped to Terminal A.',
-      'Ask in the discussion box: “Why is container throughput lower this week?”',
-      'Ask about “Terminal B” — the assistant refuses because it is outside the scope.',
-    ],
-  },
-  {
-    title: 'Scenario 4 — Wider scopes without leakage',
-    summary: 'Multi-terminal manager, then port authority',
-    start: { orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'multi', to: '/' },
-    steps: [
-      'Multi-terminal scope shows Terminals A, B and C side by side (each in its own unit).',
-      'Sign out → Port Authority Management (Management): port-wide vessel traffic, throughput and risk.',
-      'Sign in as Shipping Agency B: only that agency’s vessel calls and alerts are visible.',
-    ],
-  },
-  {
-    title: 'Scenario 5 — Bulk & tanker calls, environment, integrated report',
-    summary: 'Harbor Master, Management perspective (port-wide)',
-    start: { orgId: 'ORG-SBMA', role: 'harbor_master', perspective: 'management', to: '/vessel-calls' },
-    steps: [
-      'Open SB-2026-000122 (coal, MT) and SB-2026-000123 (fuel, KL) — commodity-specific units.',
-      'Alerts: coal dust environmental alert and tanker manifold drip; acknowledge / resolve.',
-      'On SB-2026-000120: verify production and tally, then close the call (Port Control records Last Line and ATD in the Submission perspective).',
+      'Vessel Intelligence: delay Pareto and waiting-time trend; current calls waiting at anchorage.',
+      'Open a vessel call: movement events show their source (VTMS / PMIS simulated); manual entry is labelled as fallback.',
       'Open the Integrated Vessel Call Report and print / save as PDF.',
     ],
   },
@@ -80,7 +77,7 @@ export function Guide() {
     <PageShell>
       <PageHeader
         title='Demo Guide'
-        description='Five management demo scenarios from the Project Design Document. Every value is synthetic and labelled.'
+        description='Five PORTIX management scenarios: DATA → PERFORMANCE → INSIGHT → DECISION → ACTION → OUTCOME. Every value and target is synthetic and labelled.'
         actions={
           <Button variant='outline' onClick={() => setConfirm(true)}>
             <RotateCcw /> Reset demo data
@@ -124,7 +121,8 @@ export function Guide() {
           </CardHeader>
           <CardContent className='grid gap-2 text-sm'>
             <ul className='list-disc space-y-1 ps-5'>
-              <li>All vessels, IMO numbers, organizations, berths and figures are fictitious demo data.</li>
+              <li>All vessels, IMO numbers, organizations, berths, figures and KPI targets are fictitious demo data; targets are illustrative until approved by SBMA.</li>
+              <li>PORTIX is the intelligence layer above TOS, VTMS and PMIS, which remain the systems of record. It does not control vessel traffic or terminal operations.</li>
               <li>AI extraction, insights and answers are rule-based simulations — no AI model is called and no file content is read.</li>
               <li>API connectors are simulated. No connection to SBMA, AIS, TOS or government systems.</li>
               <li>Demo sign-in has no password; production derives roles and scopes from the authenticated identity.</li>

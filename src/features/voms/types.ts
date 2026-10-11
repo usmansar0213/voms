@@ -234,6 +234,7 @@ export type AlertCategory =
   | 'incident'
   | 'environment'
   | 'traffic'
+  | 'kpi_breach'
 
 export interface Alert {
   id: string
@@ -251,6 +252,37 @@ export interface Alert {
   resolvedBy?: string
   resolvedAt?: string
   resolution?: string
+  /** PORTIX: KPI that triggered the alert and the period evaluated. */
+  kpiId?: string
+  period?: string
+  /** 1 = owner, 2 = unit management, 3 = Port Authority executive */
+  escalation?: 1 | 2 | 3
+}
+
+export type ActionStatus = 'proposed' | 'in_progress' | 'blocked' | 'done' | 'closed' | 'cancelled'
+export type ActionPriority = 'high' | 'medium' | 'low'
+
+/** PORTIX Management Action: issue → action → owner → due → status → outcome. */
+export interface ManagementAction {
+  id: string
+  title: string
+  issue: string
+  origin: { type: 'alert' | 'kpi' | 'insight' | 'manual'; ref?: string }
+  kpiId?: string
+  /** 'PORT' or a terminal unit id */
+  scope: string
+  recommendedAction: string
+  ownerName: string
+  ownerRole: RoleId
+  ownerOrgId: string
+  priority: ActionPriority
+  dueDate: string // yyyy-MM-dd
+  status: ActionStatus
+  createdBy: string
+  createdAt: string
+  baseline?: { period: string; value: number }
+  outcome?: { period: string; value: number | null; assessment: 'improved' | 'no_change' | 'worsened'; note: string; closedBy: string; closedAt: string }
+  updates: { time: string; who: string; note: string; status?: ActionStatus }[]
 }
 
 export type DailyMetric = 'container_moves' | 'bulk_mt' | 'liquid_kl' | 'vessel_arrivals'

@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Bot, Send, Sparkles, UserRound } from 'lucide-react'
+import { Bot, ClipboardPlus, Send, Sparkles, UserRound } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { answer, insights, suggestedQuestions } from '../ai'
-import { useVoms } from '../store'
+import { answer, insights, suggestedQuestions, type Insight } from '../ai'
+import { CreateActionDialog } from './create-action-dialog'
+import { useCan, useVoms } from '../store'
 import { ToneBadge } from './common'
 
 export function SimulatedAiBadge() {
@@ -15,39 +16,70 @@ export function SimulatedAiBadge() {
   )
 }
 
+function InsightCard({ i }: { i: Insight }) {
+  const [open, setOpen] = useState(false)
+  const canCreate = useCan('action.create')
+  const actionable = i.followUp !== 'No follow-up needed.'
+  const scope = i.unitId && ['U-TA', 'U-TB', 'U-TC'].includes(i.unitId) ? (i.unitId as 'U-TA' | 'U-TB' | 'U-TC') : undefined
+  return (
+    <article className='grid content-start gap-2 rounded-lg border bg-card p-3 text-sm'>
+      <div className='flex items-start gap-2'>
+        <ToneBadge tone={i.tone} className='shrink-0'>
+          {i.tone === 'good' ? 'Normal' : i.tone === 'info' ? 'Notable' : i.tone === 'warning' ? 'Review' : 'Risk'}
+        </ToneBadge>
+        <h3 className='leading-snug font-semibold'>{i.title}</h3>
+      </div>
+      <div>
+        <div className='text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'>Verified facts</div>
+        <p>{i.body}</p>
+      </div>
+      <div>
+        <div className='text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'>Interpretation · inferred</div>
+        <p className='text-muted-foreground italic'>{i.interpretation}</p>
+      </div>
+      <div>
+        <div className='text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'>Proposed action</div>
+        <div className='flex flex-wrap items-center justify-between gap-2'>
+          <p>{i.followUp}</p>
+          {actionable && canCreate && (
+            <Button size='sm' variant='outline' className='h-7' onClick={() => setOpen(true)}>
+              <ClipboardPlus /> Create action
+            </Button>
+          )}
+        </div>
+      </div>
+      <dl className='grid grid-cols-3 gap-2 border-t pt-2 text-[11px] text-muted-foreground'>
+        <div>
+          <dt>Period</dt>
+          <dd className='text-foreground'>{i.period}</dd>
+        </div>
+        <div>
+          <dt>Source</dt>
+          <dd className='text-foreground'>{i.sources}</dd>
+        </div>
+        <div>
+          <dt>Validation</dt>
+          <dd className='text-foreground'>{i.validation}</dd>
+        </div>
+      </dl>
+      {open && (
+        <CreateActionDialog
+          open
+          onOpenChange={setOpen}
+          draft={{ origin: { type: 'insight', ref: i.id }, title: i.title, issue: i.body, recommendedAction: i.followUp, scope }}
+        />
+      )}
+    </article>
+  )
+}
+
 export function InsightCards({ max }: { max?: number }) {
   const state = useVoms()
   const list = useMemo(() => insights(state), [state])
   return (
     <div className='grid gap-3 md:grid-cols-2'>
       {list.slice(0, max).map((i) => (
-        <article key={i.id} className='grid gap-2 rounded-lg border bg-card p-3 text-sm'>
-          <div className='flex items-start gap-2'>
-            <ToneBadge tone={i.tone} className='shrink-0'>
-              {i.tone === 'good' ? 'Normal' : i.tone === 'info' ? 'Notable' : i.tone === 'warning' ? 'Review' : 'Risk'}
-            </ToneBadge>
-            <h3 className='font-semibold leading-snug'>{i.title}</h3>
-          </div>
-          <p>{i.body}</p>
-          <p className='text-muted-foreground'>
-            <span className='font-medium text-foreground'>Follow-up: </span>
-            {i.followUp}
-          </p>
-          <dl className='grid grid-cols-3 gap-2 border-t pt-2 text-[11px] text-muted-foreground'>
-            <div>
-              <dt>Period</dt>
-              <dd className='text-foreground'>{i.period}</dd>
-            </div>
-            <div>
-              <dt>Source</dt>
-              <dd className='text-foreground'>{i.sources}</dd>
-            </div>
-            <div>
-              <dt>Validation</dt>
-              <dd className='text-foreground'>{i.validation}</dd>
-            </div>
-          </dl>
-        </article>
+        <InsightCard key={i.id} i={i} />
       ))}
     </div>
   )
@@ -115,7 +147,7 @@ export function DiscussionBox({ compact }: { compact?: boolean }) {
           ask(text)
         }}
       >
-        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder='Ask a question, e.g. “Which vessel calls are delayed?”' aria-label='Ask VOMS' />
+        <Input value={text} onChange={(e) => setText(e.target.value)} placeholder='Ask a question, e.g. “Which vessel calls are delayed?”' aria-label='Ask PORTIX' />
         <Button type='submit' size='icon' aria-label='Send' disabled={!text.trim() || busy}>
           <Send />
         </Button>

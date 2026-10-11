@@ -35,7 +35,7 @@ export function Incidents() {
     <PageShell>
       <PageHeader
         title='Safety, Security & Environmental'
-        description='Incidents linked to vessel calls. VOMS records and monitors; it does not replace specialist assessment or official notification.'
+        description='Incidents linked to vessel calls. PORTIX records and monitors; it does not replace specialist assessment or official notification.'
         actions={
           can(actor, 'incident.report') && (
             <Button onClick={() => setOpen(true)}>

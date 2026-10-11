@@ -27,7 +27,7 @@ import { defaultName, orgs, perspectiveMeta, rolesForOrg, scopeOptions } from '.
 import { roleById } from '../roles'
 import { useVoms } from '../store'
 import type { Perspective, RoleId, Session } from '../types'
-import { VomsMark } from '../components/voms-mark'
+import { PortixMark } from '../components/portix-mark'
 
 export interface Persona {
   key: string
@@ -42,12 +42,17 @@ export interface Persona {
 }
 
 export const personas: Persona[] = [
-  { key: 'ta-coordinator', label: 'Container terminal coordinator', hint: 'Scenario 1 — upload & anomaly', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'submission', icon: Container, color: 'var(--series-1)' },
-  { key: 'tb-coordinator', label: 'Terminal B coordinator', hint: 'Scenario 2 — API failure', orgId: 'ORG-TB', role: 'terminal_operator', perspective: 'submission', icon: Building2, color: 'var(--status-good)' },
-  { key: 'ta-manager', label: 'Single-terminal manager', hint: 'Scenario 3 — KPIs, AI & Q&A', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'U-TA', icon: LayoutDashboard, color: 'var(--series-7)' },
-  { key: 'terminal-group', label: 'Multi-terminal manager', hint: 'Scenario 4 — wider scope', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'multi', icon: Network, color: 'var(--status-warning)' },
-  { key: 'port-authority', label: 'Port authority management', hint: 'Scenario 4/5 — port-wide', orgId: 'ORG-SBMA', role: 'management', perspective: 'management', icon: Landmark, color: 'var(--status-critical)' },
-  { key: 'harbor-master', label: 'Harbor master (management)', hint: 'Scenario 5 — verify & close', orgId: 'ORG-SBMA', role: 'harbor_master', perspective: 'management', icon: Anchor, color: '#1b2638' },
+  { key: 'port-authority', label: 'Port Authority Executive', hint: 'Scenario 1 — monthly executive review', orgId: 'ORG-SBMA', role: 'management', perspective: 'management', icon: Landmark, color: 'var(--series-1)' },
+  { key: 'harbor-master', label: 'Port Operations Manager', hint: 'Scenario 2 — KPI breach → action → outcome', orgId: 'ORG-SBMA', role: 'harbor_master', perspective: 'management', icon: Anchor, color: '#1b2638' },
+  { key: 'ta-manager', label: 'Terminal Manager (single terminal)', hint: 'Scenario 3 — benchmark & confidentiality', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'U-TA', icon: LayoutDashboard, color: 'var(--series-7)' },
+  { key: 'terminal-group', label: 'Terminal Group Manager', hint: 'Scenario 3 — multi-terminal view', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'management', scopeId: 'multi', icon: Network, color: 'var(--status-warning)' },
+  { key: 'ta-coordinator', label: 'Data Steward — Terminal A', hint: 'Scenario 4 — data quality & submission', orgId: 'ORG-TA', role: 'terminal_operator', perspective: 'submission', icon: Container, color: 'var(--brand-teal)' },
+  { key: 'integration-admin', label: 'Integration Administrator', hint: 'Scenario 4 — API feeds & mapping', orgId: 'ORG-SBMA', role: 'admin', perspective: 'submission', icon: Building2, color: 'var(--status-good)' },
+]
+
+// Older shareable links keep working.
+const personaAliases: Persona[] = [
+  { key: 'tb-coordinator', label: 'Terminal B coordinator', hint: '', orgId: 'ORG-TB', role: 'terminal_operator', perspective: 'submission', icon: Building2, color: 'var(--status-good)' },
 ]
 
 export function buildSession(orgId: string, role: RoleId, perspective: Perspective, scopeId?: string, name?: string): Session {
@@ -61,10 +66,10 @@ const heroUrl = `${import.meta.env.BASE_URL}images/subic-bay-hero.jpg`
 const heroUrlSmall = `${import.meta.env.BASE_URL}images/subic-bay-hero-960.jpg`
 
 const benefits: { icon: LucideIcon; title: string; text: string; color: string }[] = [
-  { icon: Ship, title: 'Real-time Visibility', text: 'Vessels, berths and operations', color: 'var(--series-1)' },
-  { icon: BarChart3, title: 'Better Decisions', text: 'Data-driven insights and reports', color: 'var(--status-good)' },
-  { icon: ShieldCheck, title: 'Safer Operations', text: 'Early alerts and incident tracking', color: 'var(--status-warning)' },
-  { icon: Network, title: 'Stronger Collaboration', text: 'Port, terminal and stakeholders', color: 'var(--series-7)' },
+  { icon: Ship, title: 'Port-wide Visibility', text: 'Vessels, terminals and berths in one view', color: 'var(--series-1)' },
+  { icon: BarChart3, title: 'Performance vs Target', text: 'Strategic KPIs, trends and benchmarks', color: 'var(--brand-teal)' },
+  { icon: ShieldCheck, title: 'Actions & Accountability', text: 'From alert to owner to measured outcome', color: 'var(--status-warning)' },
+  { icon: Network, title: 'Trusted Data', text: 'Integrated from TOS, VTMS and PMIS', color: 'var(--series-7)' },
 ]
 
 function Step({ n, label, children, hint }: { n: number; label: string; children: ReactNode; hint?: ReactNode }) {
@@ -102,15 +107,15 @@ export function Login() {
   const navigate = useNavigate()
   const { as } = route.useSearch()
   useEffect(() => {
-    const p = personas.find((x) => x.key === as)
+    const p = [...personas, ...personaAliases].find((x) => x.key === as)
     if (p) {
       login(buildSession(p.orgId, p.role, p.perspective, p.scopeId))
       navigate({ to: '/', replace: true })
     }
   }, [as, login, navigate])
   const [orgId, setOrgId] = useState('ORG-SBMA')
-  const [role, setRole] = useState<RoleId>('port_control')
-  const [perspective, setPerspective] = useState<Perspective>('submission')
+  const [role, setRole] = useState<RoleId>('management')
+  const [perspective, setPerspective] = useState<Perspective>('management')
   const scopes = useMemo(() => scopeOptions(orgId, role, perspective), [orgId, role, perspective])
   const [scopeId, setScopeId] = useState<string | undefined>()
   const [name, setName] = useState('')
@@ -127,7 +132,7 @@ export function Login() {
       <div className='flex items-center gap-3 border-b bg-[var(--series-1)]/10 px-4 py-2 text-xs sm:text-sm'>
         <Ship className='size-4 shrink-0 text-[var(--series-1-ink)]' aria-hidden />
         <p className='min-w-0 flex-1'>
-          <span className='font-semibold'>VOMS</span>
+          <span className='font-semibold'>PORTIX</span>
           <span className='hidden sm:inline'> · Port of Subic Bay · Demo Environment</span> · All data are simulated for demonstration purposes only.
           <span className='hidden xl:inline'>
             <Info className='mb-0.5 ms-3 inline size-3.5 text-[var(--series-1-ink)]' aria-hidden /> Not connected to live SBMA, AIS or terminal systems.
@@ -138,7 +143,7 @@ export function Login() {
 
       <div className='relative grid flex-1 lg:grid-cols-[minmax(0,1.15fr)_minmax(28rem,0.85fr)]'>
         {/* Hero (wide screens) */}
-        <section aria-label='About VOMS' className='relative hidden lg:block'>
+        <section aria-label='About PORTIX' className='relative hidden lg:block'>
           <div
             className='sticky top-0 flex h-[calc(100svh-2.75rem)] max-h-[64rem] min-h-[40rem] flex-col overflow-hidden bg-[#2a5f9e] bg-cover bg-[80%_center] px-[5%] pt-[3.5vh] pb-[3vh]'
             style={{ backgroundImage: `url(${heroUrl})` }}
@@ -148,25 +153,26 @@ export function Login() {
             <div className='pointer-events-none absolute inset-x-0 bottom-0 h-[34%] bg-[linear-gradient(0deg,rgb(9_27_51/0.72),rgb(9_27_51/0))]' />
 
             <div className='relative flex items-center gap-3'>
-              <VomsMark className='h-14 w-16 xl:h-16 xl:w-[4.5rem]' />
+              <PortixMark className='size-14 xl:size-16' />
               <div>
-                <div className='text-3xl leading-none font-extrabold tracking-tight text-[#0d2240] xl:text-4xl'>VOMS</div>
-                <div className='mt-1 text-sm text-[#1f3a5f] xl:text-base'>Vessel Operations Monitoring System</div>
-                <div className='text-xs text-[#3d5675] xl:text-sm'>Port of Subic Bay</div>
+                <div className='text-3xl leading-none font-extrabold tracking-[0.08em] text-[#0d2240] xl:text-4xl'>PORTIX</div>
+                <div className='mt-1 text-sm text-[#1f3a5f] xl:text-base'>Port Intelligence &amp; Executive Management System</div>
+                <div className='text-xs text-[#3d5675] xl:text-sm'>Port of Subic Bay · demonstration</div>
               </div>
               <span className='ms-3 self-center rounded-full bg-[var(--status-good)]/15 px-3 py-1 text-xs font-semibold tracking-wide text-[var(--status-good-ink)]'>DEMO DATA</span>
             </div>
-            <p className='relative mt-[3vh] text-[11px] font-medium tracking-[0.3em] text-[#2b4566] uppercase'>People · Safer operations · A brighter tomorrow</p>
+            <p className='relative mt-[3vh] text-[11px] font-medium tracking-[0.3em] text-[#2b4566] uppercase'>One Port · One Intelligence · Better Decisions</p>
 
             <div className='relative mt-[2.5vh] max-w-xl'>
               <h1 className='text-[clamp(1.75rem,4vh,2.6rem)] leading-[1.07] font-extrabold tracking-tight text-[#0d2240]'>
-                Smarter Data.
+                From Port Operations
                 <br />
-                Safer Operations.
-                <br />A Stronger Subic Bay.
+                to Strategic
+                <br />
+                Intelligence.
               </h1>
               <p className='mt-[2vh] max-w-md text-[clamp(0.875rem,1.7vh,1rem)] text-[#1f3a5f]'>
-                A unified platform to monitor vessel calls, cargo operations, berth utilization, safety and compliance — built for the Port of Subic Bay.
+                PORTIX turns data from existing port systems into performance intelligence, early warnings and accountable management actions — above TOS, VTMS and PMIS, not instead of them.
               </p>
             </div>
 
@@ -184,9 +190,9 @@ export function Login() {
 
             <div className='relative mt-auto'>
               <p className='font-["Great_Vibes",cursive] text-[clamp(1.5rem,3.6vh,2.25rem)] leading-[1.05] text-white drop-shadow-md'>
-                A Connected Port
+                One Port. One Intelligence.
                 <br />
-                <span className='ms-12'>A Brighter Tomorrow</span>
+                <span className='ms-12'>Better Decisions.</span>
               </p>
               <p className='mt-4 text-[11px] tracking-[0.25em] text-white/90 uppercase'>Subic Bay Freeport Zone | Philippines</p>
             </div>
@@ -197,10 +203,10 @@ export function Login() {
         <div className='relative flex h-44 items-end overflow-hidden bg-[#2a5f9e] bg-cover bg-[75%_center] sm:h-56 lg:hidden' style={{ backgroundImage: `url(${heroUrlSmall})` }}>
           <div className='absolute inset-0 bg-[linear-gradient(0deg,rgb(9_27_51/0.75),rgb(9_27_51/0.05))]' />
           <div className='relative flex items-center gap-2 px-4 pb-14 text-white sm:pb-16'>
-            <VomsMark className='h-10 w-11 rounded-md bg-white/90 p-1' />
+            <PortixMark className='size-10' />
             <div>
-              <div className='text-2xl leading-none font-extrabold'>VOMS</div>
-              <div className='text-xs text-white/90'>Vessel Operations Monitoring System · Port of Subic Bay</div>
+              <div className='text-2xl leading-none font-extrabold tracking-[0.08em]'>PORTIX</div>
+              <div className='text-xs text-white/90'>Port Intelligence &amp; Executive Management · Subic Bay</div>
             </div>
           </div>
         </div>

@@ -173,7 +173,7 @@ export function seedConnectors(now: number): Connector[] {
       failure24h: 9,
       retryQueue: 3,
       mappingErrors: [
-        { time: at(-40), field: 'commodity_code', message: 'Code "COAL-STM" not mapped to the VOMS commodity list' },
+        { time: at(-40), field: 'commodity_code', message: 'Code "COAL-STM" not mapped to the PORTIX commodity list' },
         { time: at(-20), field: 'quantity_uom', message: 'Unit "LT" (long tons) not in approved unit list' },
       ],
       log: [

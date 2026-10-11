@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react'
 import { Link, useLocation } from '@tanstack/react-router'
-import { Bell, FileStack, Info, LayoutDashboard, Menu, RotateCcw, Ship, X } from 'lucide-react'
+import { Bell, ClipboardList, FileStack, Info, LayoutDashboard, Menu, RotateCcw, Ship, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { useSidebar } from '@/components/ui/sidebar'
@@ -30,8 +30,8 @@ export function DemoBanner() {
     <div role='note' className='flex items-center gap-3 border-b bg-[var(--series-1)]/10 px-4 py-2 text-xs text-foreground sm:text-sm'>
       <Ship className='hidden size-4 shrink-0 text-[var(--series-1-ink)] sm:block' aria-hidden />
       <p className='min-w-0 flex-1'>
-        <span className='font-semibold'>VOMS</span>
-        <span className='hidden sm:inline'> · Port of Subic Bay</span> · Demo environment — all data are simulated.
+        <span className='font-semibold'>PORTIX</span>
+        <span className='hidden sm:inline'> · Port of Subic Bay</span> · Demo environment — all data and targets are simulated.
         <span className='hidden lg:inline'>
           {' '}
           <Info className='mb-0.5 ms-2 inline size-3.5 text-[var(--series-1-ink)]' aria-hidden /> Not connected to live SBMA, AIS or terminal systems.
@@ -98,7 +98,13 @@ export function PageShell({ children, className }: { children: ReactNode; classN
   )
 }
 
-const tabs = [
+const managementTabs = [
+  { to: '/', label: 'Overview', icon: LayoutDashboard },
+  { to: '/actions', label: 'Actions', icon: ClipboardList },
+  { to: '/vessel-intelligence', label: 'Vessels', icon: Ship },
+  { to: '/alerts', label: 'Alerts', icon: Bell },
+] as const
+const submissionTabs = [
   { to: '/', label: 'Home', icon: LayoutDashboard },
   { to: '/submissions', label: 'Submissions', icon: FileStack },
   { to: '/vessel-calls', label: 'Calls', icon: Ship },
@@ -109,6 +115,8 @@ const tabs = [
 export function BottomNav() {
   const path = useLocation({ select: (l) => l.pathname })
   const { setOpenMobile } = useSidebar()
+  const perspective = useVoms((s) => s.perspective)
+  const tabs = perspective === 'management' ? managementTabs : submissionTabs
   return (
     <nav
       aria-label='Primary'

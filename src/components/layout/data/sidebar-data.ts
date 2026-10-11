@@ -1,51 +1,91 @@
 import {
-  Anchor,
-  BarChart3,
   Bell,
   BookOpen,
   Bot,
+  Building2,
+  ClipboardList,
+  Database,
   FileStack,
+  Gauge,
   LayoutDashboard,
-  Package,
-  PlugZap,
-  ShieldAlert,
-  ShieldCheck,
   Ship,
-  Waves,
+  ShieldCheck,
+  Target,
+  TrendingUp,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
+// PORTIX navigation (PORTIX_UI_UX_TRANSFORMATION.md §3). Management perspective
+// gets the ten executive modules; the Submission perspective a data workspace.
 export const sidebarData: SidebarData = {
   navGroups: [
     {
-      title: 'Home',
+      title: 'Intelligence',
       items: [
-        { title: 'Dashboard', url: '/', icon: LayoutDashboard },
-        { title: 'Submission Center', url: '/submissions', icon: FileStack, only: 'submission' },
-        { title: 'Submission Review', url: '/submissions', icon: FileStack, only: 'management' },
-        { title: 'Alerts', url: '/alerts', icon: Bell },
-        { title: 'Ask VOMS (AI)', url: '/ask', icon: Bot },
+        { title: 'Executive Overview', url: '/', icon: LayoutDashboard, only: 'management' },
+        {
+          title: 'Port Performance',
+          icon: TrendingUp,
+          only: 'management',
+          items: [
+            { title: 'Performance vs target', url: '/performance' },
+            { title: 'Vessel-level reports', url: '/reports' },
+          ],
+        },
+        {
+          title: 'Vessel Intelligence',
+          icon: Ship,
+          items: [
+            { title: 'Analytics', url: '/vessel-intelligence' },
+            { title: 'Vessel calls', url: '/vessel-calls' },
+            { title: 'Berths & wharves', url: '/berths' },
+            { title: 'Live operations', url: '/operations' },
+          ],
+        },
+        {
+          title: 'Terminal Intelligence',
+          icon: Building2,
+          items: [
+            { title: 'Benchmark', url: '/terminals' },
+            { title: 'Cargo operations', url: '/cargo' },
+          ],
+        },
+        { title: 'Strategic KPIs', url: '/kpis', icon: Target, only: 'management' },
       ],
     },
     {
-      title: 'Operations',
+      title: 'Decisions',
       items: [
-        { title: 'Vessel Calls', url: '/vessel-calls', icon: Ship },
-        { title: 'Berths & Wharves', url: '/berths', icon: Anchor },
-        { title: 'Cargo & Terminal', url: '/cargo', icon: Package },
-        { title: 'Safety & Incidents', url: '/incidents', icon: ShieldAlert },
+        {
+          title: 'Alerts & Risks',
+          icon: Bell,
+          items: [
+            { title: 'Alerts', url: '/alerts' },
+            { title: 'Safety & incidents', url: '/incidents' },
+          ],
+        },
+        { title: 'Management Actions', url: '/actions', icon: ClipboardList, only: 'management' },
+        { title: 'AI Intelligence', url: '/ask', icon: Bot },
       ],
     },
     {
-      title: 'Data & Reporting',
+      title: 'Data',
       items: [
-        { title: 'API Integration Monitor', url: '/api-monitor', icon: PlugZap },
-        { title: 'KPIs & Reports', url: '/reports', icon: BarChart3, only: 'management' },
-        { title: 'Vessel Registry', url: '/vessels', icon: Waves },
+        { title: 'My Data Workspace', url: '/', icon: Gauge, only: 'submission' },
+        { title: 'Submissions', url: '/submissions', icon: FileStack, only: 'submission' },
+        {
+          title: 'Data Integration',
+          icon: Database,
+          items: [
+            { title: 'Submission review', url: '/submissions' },
+            { title: 'API integration monitor', url: '/api-monitor' },
+            { title: 'Vessel registry', url: '/vessels' },
+          ],
+        },
       ],
     },
     {
-      title: 'System',
+      title: 'Administration',
       items: [
         { title: 'Roles & Access', url: '/access', icon: ShieldCheck },
         { title: 'Demo Guide', url: '/guide', icon: BookOpen },

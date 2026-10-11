@@ -17,6 +17,10 @@
   .grid > * {
     min-width: 0;
   }
+  /* Scroll containers must also contain absolutely positioned descendants (e.g. sr-only labels). */
+  .overflow-x-auto {
+    position: relative;
+  }
   body {
     @apply min-h-svh w-full bg-background text-foreground has-[div[data-variant='inset']]:bg-sidebar;
   }

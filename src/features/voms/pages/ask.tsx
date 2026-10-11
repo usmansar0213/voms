@@ -9,7 +9,7 @@ export function Ask() {
   return (
     <PageShell>
       <PageHeader
-        title='Ask VOMS'
+        title='AI Intelligence'
         description={`Contextual questions about data in your scope (${session?.scopeLabel}). Responses are scripted from demo data and clearly labelled — no AI model is called.`}
       />
       <div className='grid gap-4 lg:grid-cols-5'>

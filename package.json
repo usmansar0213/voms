@@ -1,13 +1,14 @@
 {
-  "name": "voms-mockup",
+  "name": "portix-demo",
   "private": true,
   "version": "0.1.0",
-  "description": "VOMS — Vessel Operations Monitoring System, Port of Subic Bay. Interactive UI mockup with simulated demo data. Built on shadcn-admin (MIT).",
+  "description": "PORTIX \u2014 Port Intelligence & Executive Management System. Management demonstration (simulated data) for the Port of Subic Bay. Evolved from the VOMS mockup; UI shell based on shadcn-admin (MIT).",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -48,6 +49,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "typescript": "~6.0.3",
-    "vite": "^8.0.8"
+    "vite": "^8.0.8",
+    "vitest": "^3.2.4"
   }
 }

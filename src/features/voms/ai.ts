@@ -10,8 +10,13 @@ import type { DailyMetric } from './types'
 export interface Insight {
   id: string
   title: string
+  /** Verified facts computed from data in scope. */
   body: string
+  /** Inferred explanation — not a verified cause. */
+  interpretation: string
+  /** Proposed follow-up (can become a management action). */
   followUp: string
+  unitId?: string
   tone: 'good' | 'warning' | 'serious' | 'info'
   period: string
   sources: string
@@ -58,7 +63,15 @@ export function insights(s: VomsState): Insight[] {
       body: `${fmtNum(t.a)} ${meta.unit} in the last 7 reported days vs ${fmtNum(t.b)} the week before.${
         extreme ? ` Lowest day ${t.min.date}: ${fmtNum(t.min.value)}; highest ${t.max.date}: ${fmtNum(t.max.value)} — check for reporting anomalies.` : ''
       }`,
-      followUp: t.pending ? `${t.pending} day(s) still pending review — confirm before relying on the trend.` : Math.abs(t.change) > 15 ? 'Review vessel mix and delays for the period.' : 'No follow-up needed.',
+      interpretation: t.pending
+        ? 'Part of the week is not yet validated, so the trend may change once pending reports are approved.'
+        : extreme
+          ? 'An unusually low or high day drives the change; this is more likely a reporting issue than an operational shift.'
+          : Math.abs(t.change) > 15
+            ? 'A change of this size usually reflects vessel mix or weather; confirm against delays before drawing conclusions.'
+            : 'Within normal week-to-week variation.',
+      followUp: t.pending ? `Confirm ${t.pending} pending day(s) for ${u.short} before relying on the trend.` : Math.abs(t.change) > 15 ? `Review vessel mix and delays for ${u.short} this week.` : 'No follow-up needed.',
+      unitId: u.id,
       tone: t.pending || extreme ? 'warning' : Math.abs(t.change) > 15 ? 'info' : 'good',
       period: `${t.last7[0].date} → ${t.last7[t.last7.length - 1].date}`,
       sources: `${t.last7.length} daily ${u.short} submissions`,
@@ -75,6 +88,7 @@ export function insights(s: VomsState): Insight[] {
       id: 'delays',
       title: `${delayed.length} vessel call(s) delayed or waiting`,
       body: delayed.map((c) => `${c.id}${callStatus(c) === 'arrived' && !c.berthId ? ' (at anchorage, no berth)' : ` (+${fmtNum(etaVariance(c) ?? 0, 1)} h vs ETA)`}`).join('; '),
+      interpretation: 'Arrivals later than ETA and calls without a berth point to schedule or berth-allocation pressure.',
       followUp: 'Confirm berth availability and update ETAs with the agents concerned.',
       tone: 'warning',
       period: 'Current',
@@ -94,6 +108,7 @@ export function insights(s: VomsState): Insight[] {
       id: 'etd-risk',
       title: `${behind.length} call(s) at risk of missing ETD`,
       body: behind.map((c) => `${c.id}: ETD ${fmtRelative(c.events.etd!.time)}`).join('; '),
+      interpretation: 'At the current production rate the remaining quantity may not be completed before ETD.',
       followUp: 'Check productivity and remaining quantity with the terminal.',
       tone: 'serious',
       period: 'Next 8 hours',
@@ -111,7 +126,8 @@ export function insights(s: VomsState): Insight[] {
         ...conns.map((c) => `${c.name.replace(' (simulated)', '')} ${c.status}; last success ${fmtRelative(c.lastSuccess)}`),
         ...missing.map((a) => a.title),
       ].join('; '),
-      followUp: 'Dashboards for affected units may be incomplete until data arrives.',
+      interpretation: 'Dashboards for affected units may understate activity until data arrives.',
+      followUp: 'Restore the affected feeds and chase missing reports.',
       tone: 'warning',
       period: 'Last 24 hours',
       sources: 'API monitor and submission schedule',
@@ -119,7 +135,7 @@ export function insights(s: VomsState): Insight[] {
     })
 
   if (!out.length)
-    out.push({ id: 'none', title: 'No material deviations', body: 'Indicators in your scope are within their recent range.', followUp: '—', tone: 'good', period: 'Last 7 days', sources: 'All data in scope', validation: '—' })
+    out.push({ id: 'none', title: 'No material deviations', body: 'Indicators in your scope are within their recent range.', interpretation: 'No unusual pattern detected.', followUp: 'No follow-up needed.', tone: 'good', period: 'Last 7 days', sources: 'All data in scope', validation: '—' })
   return out
 }
 

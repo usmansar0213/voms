@@ -89,8 +89,8 @@ export function RecordEventDialog({ call, eventKey, ...props }: DialogProps & { 
   return (
     <Shell
       {...props}
-      title={`${existing ? 'Amend' : 'Record'} ${eventLabels[eventKey]}`}
-      description={`${call.id} · Time is in local port time. ${existing ? 'The original value is retained in the audit history.' : ''}`}
+      title={`Manual fallback — ${existing ? 'amend' : 'record'} ${eventLabels[eventKey]}`}
+      description={`${call.id} · Use only when the source system (VTMS / PMIS) has no feed for this event. The entry is flagged as manual and reconciled later. Local port time. ${existing ? 'The original value is retained in the audit history.' : ''}`}
       footer={
         <>
           <Button variant='outline' onClick={() => props.onOpenChange(false)}>
@@ -299,7 +299,7 @@ export function IncidentDialog({ callId, ...props }: DialogProps & { callId?: st
     <Shell
       {...props}
       title='Report incident'
-      description='Recording an incident in VOMS is not an official notification to a competent authority.'
+      description='Recording an incident in PORTIX is not an official notification to a competent authority.'
       footer={
         <>
           <Button variant='outline' onClick={() => props.onOpenChange(false)}>

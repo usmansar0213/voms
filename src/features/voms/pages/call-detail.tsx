@@ -308,7 +308,7 @@ function Movements({ call }: { call: VesselCall }) {
     <Card>
       <CardHeader>
         <CardTitle>Movement events</CardTitle>
-        <CardDescription>Actual times recorded against the Vessel Call ID. Recorder and verifier must be different roles.</CardDescription>
+        <CardDescription>In PORTIX, movement events are ingested from VTMS / PMIS (simulated in this demo) and shown with their source. Manual entry is a governed fallback for sources not yet integrated; recorder and verifier must be different roles.</CardDescription>
         {can(actor, 'event.verify') && anyUnverified && !closed && (
           <CardAction>
             <Button size='sm' variant='outline' onClick={() => runAction(() => verifyAll(call.id), 'Events verified')}>
@@ -364,7 +364,7 @@ function Movements({ call }: { call: VesselCall }) {
                     {canRecord(k) && (
                       <Button size='sm' variant={ev ? 'ghost' : 'outline'} onClick={() => setDialog(k)}>
                         {ev ? <Pencil /> : <Plus />}
-                        {ev ? 'Amend' : 'Record'}
+                        {ev ? 'Amend (fallback)' : 'Manual entry'}
                       </Button>
                     )}
                     {ev && !ev.verifiedBy && can(actor, 'event.verify') && !closed && (

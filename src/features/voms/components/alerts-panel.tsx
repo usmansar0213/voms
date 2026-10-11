@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { BellOff, Check, CheckCheck } from 'lucide-react'
+import { BellOff, Check, CheckCheck, ClipboardPlus } from 'lucide-react'
+import { CreateActionDialog } from './create-action-dialog'
+import type { KpiId, Scope } from '../kpi'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { fmtRelative, fmtShort } from '../format'
@@ -20,6 +22,7 @@ export const categoryLabel: Record<AlertCategory, string> = {
   incident: 'Incident',
   environment: 'Environment',
   traffic: 'Traffic',
+  kpi_breach: 'KPI breach',
 }
 
 export function AlertItem({ alert: a }: { alert: Alert }) {
@@ -28,6 +31,7 @@ export function AlertItem({ alert: a }: { alert: Alert }) {
   const resolve = useVoms((s) => s.resolveAlert)
   const [note, setNote] = useState('')
   const [resolving, setResolving] = useState(false)
+  const [creating, setCreating] = useState(false)
   return (
     <li className='grid gap-2 rounded-lg border p-3 text-sm'>
       <div className='flex flex-wrap items-center gap-2'>
@@ -49,12 +53,23 @@ export function AlertItem({ alert: a }: { alert: Alert }) {
           </Link>
         )}
         <span>Owner: {roleById[a.ownerRole].name}</span>
+        {a.escalation && <span className='font-medium text-foreground'>Escalation L{a.escalation}</span>}
+        {a.kpiId && (
+          <Link to='/kpis/$kpiId' params={{ kpiId: a.kpiId }} search={{ scope: ['U-TA', 'U-TB', 'U-TC'].includes(a.unitId) ? a.unitId : 'PORT' }} className='underline'>
+            {a.kpiId}
+          </Link>
+        )}
         <span className='font-medium text-foreground capitalize'>{a.status}</span>
         {a.ackBy && <span>Ack: {a.ackBy}</span>}
         {a.resolution && <span>Resolution: {a.resolution}</span>}
       </div>
       {a.status !== 'resolved' && (
         <div className='flex flex-wrap items-center gap-2'>
+          {can(actor, 'action.create') && (
+            <Button size='sm' variant='outline' onClick={() => setCreating(true)}>
+              <ClipboardPlus /> Create action
+            </Button>
+          )}
           {a.status === 'open' && can(actor, 'alert.acknowledge') && (
             <Button size='sm' variant='outline' onClick={() => runAction(() => acknowledge(a.id), 'Alert acknowledged')}>
               <Check /> Acknowledge
@@ -74,6 +89,20 @@ export function AlertItem({ alert: a }: { alert: Alert }) {
               </Button>
             ))}
         </div>
+      )}
+      {creating && (
+        <CreateActionDialog
+          open
+          onOpenChange={setCreating}
+          draft={{
+            origin: { type: 'alert', ref: a.id },
+            title: a.title,
+            issue: a.evidence,
+            kpiId: a.kpiId as KpiId | undefined,
+            scope: (['U-TA', 'U-TB', 'U-TC'].includes(a.unitId) ? a.unitId : 'PORT') as Scope,
+            priority: a.severity === 'critical' || a.severity === 'serious' ? 'high' : 'medium',
+          }}
+        />
       )}
     </li>
   )

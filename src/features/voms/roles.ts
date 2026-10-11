@@ -55,7 +55,7 @@ export const roles: Role[] = [
   },
   {
     id: 'management',
-    name: 'Port Authority Management',
+    name: 'Port Authority Executive',
     org: 'SBMA Management',
     short: 'MG',
     description: 'Port-wide performance, risk and throughput.',
@@ -102,6 +102,9 @@ export type Action =
   | 'report.view'
   | 'report.export'
   | 'ai.ask'
+  | 'action.create'
+  | 'action.update'
+  | 'action.close'
 
 export const actionLabels: Record<Action, string> = {
   'call.create': 'Create vessel call / pre-arrival notice',
@@ -128,6 +131,9 @@ export const actionLabels: Record<Action, string> = {
   'report.view': 'View dashboards & reports',
   'report.export': 'Export / print reports',
   'ai.ask': 'Use AI insights & discussion',
+  'action.create': 'Create management action',
+  'action.update': 'Update action progress / follow-up',
+  'action.close': 'Review outcome & close action',
 }
 
 export interface Actor {
@@ -166,6 +172,9 @@ const matrix: Record<Action, Key[]> = {
   'report.view': [...ALL_SUB, ...ALL_MGMT],
   'report.export': ALL_MGMT,
   'ai.ask': [...ALL_SUB, ...ALL_MGMT],
+  'action.create': ALL_MGMT,
+  'action.update': ALL_MGMT,
+  'action.close': ['management:management', 'harbor_master:management', 'port_control:management'],
 }
 
 export function can(actor: Actor, action: Action) {

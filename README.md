@@ -1,38 +1,41 @@
-# VOMS Mockup — Port of Subic Bay
+# PORTIX — Port Intelligence & Executive Management System (demo)
 
-This is an interactive UI mockup of the **Vessel Operations Monitoring System (VOMS)**. It illustrates the business requirements in the VOMS BRD (draft v0.1) for the Port of Subic Bay, Subic Bay Metropolitan Authority (SBMA).
+**One Port. One Intelligence. Better Decisions.**
 
-> **Demo only.** All vessels, IMO numbers, agencies, berths and figures are fictitious. Berths B-01 to B-15 are placeholders until they are validated against the official SBMA facility register. The app has no connection to SBMA, AIS, TOS or any government system. Integration is simulated, and every simulated record is labelled.
+PORTIX is a strategic and management intelligence layer for Port Authorities. This repository holds the management demonstration for the Port of Subic Bay (SBMA). It evolved from the VOMS mockup.
 
-## What it shows
+> **Demo only.** All vessels, organizations, berths, figures and KPI targets are fictitious; targets are *illustrative* until SBMA approves them. The demo has no connection to SBMA, AIS/VTMS, TOS, PMIS or any government system. AI features are rule-based simulations and are labelled as such.
 
-The mockup follows the **Project Design Document v0.1**. It has **six operational roles** (BRD Section 18), and each role has two perspectives:
+## Positioning
 
-| Role | Submission perspective (record & submit) | Management perspective (verify, approve & monitor) |
+PORTIX sits **above** the operational systems of record. It does not replace them:
+
+| Level | Systems | Role |
 | --- | --- | --- |
-| Port Control Operator | Movement events, daily vessel movement log, AIS feed | Port-wide traffic and delays; verifies movement records |
-| Harbor Master / Authorized Officer | Berth assignment, safety inspection reports, incidents | Verifies production and final tally; closes incidents and vessel calls |
-| Terminal Operator | Daily terminal reports (Excel/PDF), production, delays, TOS API | Terminal KPIs for one or several terminals; approves terminal submissions |
-| Shipping Agent | Pre-arrival notices, ETA updates, manifests | Own vessel calls from arrival to departure |
-| Port Authority Management | Monthly port statistics report | Port-wide KPIs, alerts, AI insights and discussion |
-| System / Access Administrator | Access and connector changes, mapping tables, simulator | System health, data freshness and audit |
+| 3 — Strategic & management intelligence | **PORTIX** | Executive dashboards, KPIs vs targets, benchmarking, alerts, management actions, AI insights |
+| 2 — Data integration & intelligence | PORTIX platform services (planned) | Ingestion (API, files, manual), validation, reconciliation, lineage, access control |
+| 1 — Operational systems of record | TOS (per terminal), VTMS/AIS, PMIS | Remain authoritative |
 
-A record is never approved from the perspective that created it, and a submitter cannot approve their own submission.
+Movement events on vessel calls are shown as **ingested** (simulated). Manual entry is a labelled fallback for sources that are not yet integrated.
 
-| Module | Reference |
+## Modules
+
+| Menu | What it shows |
 | --- | --- |
-| Demo sign-in: Organization → Role → Perspective → Scope (no password) and quick-start personas | PDD §2 |
-| Scoped access: one terminal, several terminals or port-wide; dashboards, alerts, files and AI answers all respect the scope | PDD §2 |
-| Submission dashboard and Management dashboard for every role | PDD §6 |
-| Submission Center: simulated Excel/PDF extraction with confidence and source citation, anomaly detection, correction history, approval | PDD §5 |
-| API Integration Monitor: success/failure, retries, mapping errors, freshness, failure simulation | PDD §5, BRD §19 |
-| Alerts with severity, evidence, owner, acknowledgment and resolution, plus an empty state | PDD §6 |
-| AI insight cards and a contextual discussion box (rule-based, clearly labelled simulation) | PDD §7 |
-| Vessel calls, berths, cargo in commodity units, incidents, closure, audit trail, integrated report | BRD §8–16 |
+| Executive Overview | KPI achievement vs target, throughput by terminal (own units), trend, top risks, actions, terminal benchmark, executive summary (facts / interpretation / proposed actions) |
+| Port Performance | Actual vs target, turnaround decomposition, bottlenecks, vessel-level reports |
+| Vessel Intelligence | Delay Pareto, waiting-time trends, current calls, vessel-call drill-down, berths, live operations |
+| Terminal Intelligence | Cross-terminal benchmark with confidentiality: terminal managers see their own terminal and the port average only |
+| Strategic KPIs | Registry of 9 KPIs (definition, formula, unit, owner, sources, illustrative targets) and KPI detail with 24-month trend |
+| Alerts & Risks | KPI-breach, data-quality, API, safety and environmental alerts with escalation; "Create action" |
+| Management Actions | Issue → action → owner → due → status → follow-ups → outcome review against the KPI baseline (the owner cannot assess their own outcome) |
+| AI Intelligence | Scope-aware Q&A and insights (simulated) |
+| Data Integration | Excel/PDF submissions with simulated extraction and approval, API integration monitor, vessel registry |
+| Administration | Role × perspective permission matrix, demo guide |
 
-The Demo Guide covers the five PDD scenarios, with a start button for each. You can also link straight into a persona with `#/login?as=<key>`, where the key is one of `ta-coordinator`, `tb-coordinator`, `ta-manager`, `terminal-group`, `port-authority` or `harbor-master`. The layout is mobile-first, and every journey works on a phone.
+Demo personas: open `#/login?as=<key>` with `port-authority`, `harbor-master`, `ta-manager`, `terminal-group`, `ta-coordinator` or `integration-admin`.
 
-## Run locally
+## Run, test, build
 
 Requires Node.js 22 or later.
 
@@ -41,20 +44,30 @@ npm install
 npm run dev
 ```
 
-To build a static site in `dist/`:
+```bash
+npm test
+```
 
 ```bash
 npm run build
 ```
 
-The build uses relative paths and hash-based routing, so `dist/` can be hosted on any static host, including GitHub Pages under `/<repo>/`.
+`npm test` runs the Vitest unit tests for the KPI engine, business rules, permission matrix, scope isolation, submission validation, management-action workflow and executive summary. The build uses relative paths and hash routing, so `dist/` works on any static host. Every push to `main` is deployed to GitHub Pages by `.github/workflows/deploy.yml`.
 
-## Deploy to GitHub Pages
+## Documentation
 
-The workflow `.github/workflows/deploy.yml` builds and publishes the site on every push to `main`. In the repository, open **Settings → Pages** and set **Source** to **GitHub Actions** once.
+The assessment and transformation proposal are in `docs/portix/`:
+- repository audit
+- gap analysis
+- target architecture
+- data model
+- UI/UX transformation
+- implementation roadmap (P0–P4)
 
-## Credits and licenses
+This demo implements **P0 (rebranding)** and **P1 (strategic management demo)**. P2 onwards (backend, real integrations, governed AI) is not built.
 
-- UI shell based on [shadcn-admin](https://github.com/satnaing/shadcn-admin) by Sat Naing, MIT License (see `LICENSE`).
-- shadcn/ui, Radix UI, Tailwind CSS, TanStack Router, Recharts, Zustand, date-fns, Sonner (MIT); Lucide icons (ISC).
-- The event vocabulary follows concepts from the DCSA Port Call / Just-in-Time standard and IALA S-211 Port Call Message. These are used as reference only; no code was copied.
+## Credits and licences
+
+- UI shell based on [shadcn-admin](https://github.com/satnaing/shadcn-admin) by Sat Naing, MIT licence (see `LICENSE`).
+- Other libraries: shadcn/ui, Radix UI, Tailwind CSS, TanStack Router, Recharts, Zustand, date-fns, Sonner (MIT); Lucide icons (ISC).
+- Event vocabulary informed by DCSA Port Call / JIT and IALA S-211 concepts (reference only).

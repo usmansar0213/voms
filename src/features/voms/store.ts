@@ -7,6 +7,9 @@ import { useShallow } from 'zustand/react/shallow'
 import { can, roleById, type Action, type Actor } from './roles'
 import { agents, seedBerths, seedCalls, seedIncidents, vessels } from './seed'
 import { seedAlerts, seedConnectors, seedDaily, seedSubmissions } from './seed-pdd'
+import { seedActions, seedKpiAlerts } from './seed-portix'
+import { buildHistory, historyPeriods, type MonthlyRecord } from './history'
+import { kpiValue, type KpiId, type Scope } from './kpi'
 import { callStatus, eventShort } from './calc'
 import { homeUnit, isPortWide, orgById, scopeBerths, scopeOptions, unitById, units } from './org'
 import { check, extract, templates } from './submissions'
@@ -18,6 +21,8 @@ import type {
   DailyStat,
   EventKey,
   Incident,
+  ManagementAction,
+  ActionStatus,
   Perspective,
   Production,
   RoleId,
@@ -47,6 +52,12 @@ interface Data {
   submissions: Submission[]
   connectors: Connector[]
   alerts: Alert[]
+  history: MonthlyRecord[]
+  periods: string[]
+  actions: ManagementAction[]
+  nextActionSeq: number
+  /** Selected reporting month (yyyy-MM) for PORTIX executive views. */
+  selectedPeriod: string | null
   nextCallSeq: number
   nextIncidentSeq: number
   nextAlertSeq: number
@@ -99,6 +110,12 @@ interface Actions {
   // Alerts
   acknowledgeAlert: (id: string) => void
   resolveAlert: (id: string, note: string) => void
+  // Management actions (PORTIX)
+  createAction: (input: Omit<ManagementAction, 'id' | 'status' | 'createdBy' | 'createdAt' | 'updates' | 'baseline' | 'outcome'>) => string
+  setActionStatus: (id: string, status: ActionStatus, note: string) => void
+  addActionNote: (id: string, note: string) => void
+  closeAction: (id: string, assessment: 'improved' | 'no_change' | 'worsened', note: string) => void
+  setPeriod: (period: string) => void
 }
 
 export type VomsState = Data & Actions
@@ -106,6 +123,7 @@ export type VomsState = Data & Actions
 function initialData(session: Session | null = null): Data {
   const now = Math.floor(Date.now() / 60_000) * 60_000
   const daily = seedDaily(now)
+  const history = buildHistory(new Date(now))
   return {
     seededAt: new Date(now).toISOString(),
     session,
@@ -118,7 +136,12 @@ function initialData(session: Session | null = null): Data {
     daily,
     submissions: seedSubmissions(now, daily),
     connectors: seedConnectors(now),
-    alerts: seedAlerts(now),
+    alerts: [...seedAlerts(now), ...seedKpiAlerts(history, now)].sort((a, b) => b.time.localeCompare(a.time)),
+    history,
+    periods: historyPeriods(new Date(now)),
+    actions: seedActions(history, now),
+    nextActionSeq: 15,
+    selectedPeriod: null,
     nextCallSeq: 129,
     nextIncidentSeq: 33,
     nextAlertSeq: 108,
@@ -631,6 +654,75 @@ export const useVoms = create<VomsState>()(
           set((s) => ({ alerts: s.alerts.map((a) => (a.id === id && a.status === 'open' ? { ...a, status: 'acknowledged', ackBy: who(), ackAt: nowIso() } : a)) }))
         },
 
+        setPeriod: (period) => set({ selectedPeriod: period }),
+
+        createAction: (input) => {
+          guard('action.create')
+          const seq = get().nextActionSeq
+          const id = `ACT-2026-${String(seq).padStart(4, '0')}`
+          const st = get()
+          const last = st.periods[st.periods.length - 1]
+          const value = input.kpiId ? kpiValue(st.history, input.kpiId as KpiId, input.scope as Scope, last) : null
+          const action: ManagementAction = {
+            ...input,
+            id,
+            status: 'proposed',
+            createdBy: who(),
+            createdAt: nowIso(),
+            baseline: value === null ? undefined : { period: last, value: +value.toFixed(1) },
+            updates: [{ time: nowIso(), who: who(), note: `Action created${input.origin.ref ? ` from ${input.origin.ref}` : ''}.`, status: 'proposed' }],
+          }
+          set((s) => ({
+            actions: [action, ...s.actions],
+            nextActionSeq: seq + 1,
+            alerts:
+              input.origin.type === 'alert'
+                ? s.alerts.map((a) => (a.id === input.origin.ref && a.status === 'open' ? { ...a, status: 'acknowledged', ackBy: who(), ackAt: nowIso() } : a))
+                : s.alerts,
+          }))
+          return id
+        },
+
+        setActionStatus: (id, status, note) => {
+          guard('action.update')
+          if (status === 'closed') throw new PermissionError('Use outcome review to close an action.')
+          if ((status === 'blocked' || status === 'cancelled') && !note.trim()) throw new Error('Add a note explaining the change.')
+          set((s) => ({
+            actions: s.actions.map((a) =>
+              a.id === id ? { ...a, status, updates: [...a.updates, { time: nowIso(), who: who(), note: note || `Status changed to ${status.replace('_', ' ')}.`, status }] } : a
+            ),
+          }))
+        },
+
+        addActionNote: (id, note) => {
+          guard('action.update')
+          if (!note.trim()) throw new Error('Write a follow-up note.')
+          set((s) => ({ actions: s.actions.map((a) => (a.id === id ? { ...a, updates: [...a.updates, { time: nowIso(), who: who(), note }] } : a)) }))
+        },
+
+        closeAction: (id, assessment, note) => {
+          guard('action.close')
+          const st = get()
+          const a = st.actions.find((x) => x.id === id)!
+          if (a.status !== 'done') throw new Error('Only actions marked done can be reviewed and closed.')
+          if (!note.trim()) throw new Error('An outcome note is required.')
+          if (a.ownerName === who()) throw new PermissionError('The action owner cannot assess their own outcome (segregation of duties).')
+          const last = st.periods[st.periods.length - 1]
+          const value = a.kpiId ? kpiValue(st.history, a.kpiId as KpiId, a.scope as Scope, last) : null
+          set((s) => ({
+            actions: s.actions.map((x) =>
+              x.id === id
+                ? {
+                    ...x,
+                    status: 'closed',
+                    outcome: { period: last, value: value === null ? null : +value.toFixed(1), assessment, note, closedBy: who(), closedAt: nowIso() },
+                    updates: [...x.updates, { time: nowIso(), who: who(), note: `Outcome reviewed (${assessment.replace('_', ' ')}): ${note}`, status: 'closed' }],
+                  }
+                : x
+            ),
+          }))
+        },
+
         resolveAlert: (id, note) => {
           guard('alert.resolve')
           if (!note.trim()) throw new Error('Add a resolution note.')
@@ -641,8 +733,8 @@ export const useVoms = create<VomsState>()(
       }
     },
     {
-      name: 'voms-demo-v2',
-      version: 2,
+      name: 'portix-demo-v1',
+      version: 1,
       storage: createJSONStorage(() => {
         try {
           return localStorage
@@ -684,6 +776,12 @@ export function visibleSubmissions(s: Pick<VomsState, 'session' | 'submissions'>
   return s.submissions.filter((x) => inScope(s, x.unitId))
 }
 
+export function visibleActions(s: Pick<VomsState, 'session' | 'actions'>) {
+  const sess = s.session
+  if (!sess) return []
+  return s.actions.filter((a) => (a.scope === 'PORT' ? isPortWide(sess) : inScope(s, a.scope)) || a.ownerOrgId === sess.orgId && sess.role === a.ownerRole)
+}
+
 export const visibleConnectors = (s: Pick<VomsState, 'session' | 'connectors'>) => s.connectors.filter((c) => inScope(s, c.unitId))
 
 export const useVessel = (id: string) => useVoms((s) => s.vessels.find((v) => v.id === id))
@@ -691,4 +789,7 @@ export const useActor = (): Actor => useVoms(useShallow((s) => ({ role: s.role, 
 export const useCan = (action: Action) => useVoms((s) => can({ role: s.role, perspective: s.perspective }, action))
 
 // Dev-only handle for automated UI checks; stripped from production builds.
-if (import.meta.env.DEV) (window as unknown as { __voms: typeof useVoms }).__voms = useVoms
+if (import.meta.env.DEV && typeof window !== 'undefined') (window as unknown as { __voms: typeof useVoms }).__voms = useVoms
+
+/** Reporting month in effect: the user's selection or the latest complete month. */
+export const usePeriod = () => useVoms((s) => (s.selectedPeriod && s.periods.includes(s.selectedPeriod) ? s.selectedPeriod : s.periods[s.periods.length - 1]))

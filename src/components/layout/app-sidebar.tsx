@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { RotateCcw, Ship } from 'lucide-react'
+import { RotateCcw } from 'lucide-react'
 import { useLayout } from '@/context/layout-provider'
 import {
   Sidebar,
@@ -19,6 +19,7 @@ import { perspectiveMeta } from '@/features/voms/org'
 import { useVoms } from '@/features/voms/store'
 import { runAction } from '@/features/voms/components/common'
 import { sidebarData } from './data/sidebar-data'
+import { PortixMark } from '@/features/voms/components/portix-mark'
 import { NavGroup } from './nav-group'
 
 export function AppSidebar() {
@@ -35,12 +36,12 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size='lg' className='h-12 hover:bg-transparent' asChild>
               <Link to='/' onClick={() => setOpenMobile(false)}>
-                <div className='flex aspect-square size-9 items-center justify-center rounded-lg bg-sidebar-primary text-white'>
-                  <Ship className='size-5' />
-                </div>
+                <span className='shrink-0'>
+                  <PortixMark className='size-9' />
+                </span>
                 <div className='grid flex-1 text-start text-sm leading-tight'>
-                  <span className='truncate text-lg font-bold tracking-tight text-white'>VOMS</span>
-                  <span className='truncate text-xs text-sidebar-foreground/70'>Port of Subic Bay · Mockup</span>
+                  <span className='truncate text-lg font-extrabold tracking-[0.08em] text-white'>PORTIX</span>
+                  <span className='truncate text-xs text-sidebar-foreground/70'>Port Intelligence · SBMA demo</span>
                 </div>
               </Link>
             </SidebarMenuButton>

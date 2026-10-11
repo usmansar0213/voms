@@ -20,13 +20,15 @@ import { TrendGrid } from '../components/trend-charts'
 import { ConnectorStrip } from '../components/connector-strip'
 import { PageHeader, ProgressBar, StatTile } from '../components/common'
 import { SubmissionHome } from './submission-home'
+import { ExecutiveOverview } from './portix/executive-overview'
 
 export function Dashboard() {
   const perspective = useVoms((s) => s.perspective)
-  return perspective === 'submission' ? <SubmissionHome /> : <ManagementHome />
+  return perspective === 'submission' ? <SubmissionHome /> : <ExecutiveOverview />
 }
 
-function ManagementHome() {
+/** Live operations view (formerly the VOMS management dashboard), reached from Vessel Intelligence. */
+export function LiveOperations() {
   const state = useVoms()
   const session = state.session!
   const calls = visibleCalls(state)
@@ -58,7 +60,7 @@ function ManagementHome() {
   return (
     <PageShell>
       <PageHeader
-        title='Port Operations Dashboard'
+        title='Live Operations'
         description={
           <>
             {roleById[session.role].name} · {perspectiveMeta.management.label} · {session.scopeLabel} · updated {fmtShort(new Date().toISOString())}
@@ -173,7 +175,7 @@ function ManagementHome() {
             <InsightCards max={4} />
           </div>
           <div className='grid content-start gap-2 xl:col-span-2'>
-            <h3 className='text-sm font-semibold'>Discuss with VOMS</h3>
+            <h3 className='text-sm font-semibold'>Discuss with PORTIX</h3>
             <DiscussionBox compact />
           </div>
         </CardContent>
